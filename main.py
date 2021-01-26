@@ -4,35 +4,42 @@
 def clear_screen():
     pass
 
+
 def wait_for_keypress():
     _ = input()
 
+
 # variables
-pg, nm = '', ''
+program_name, cursor_issue = '', ''
 ol = pt = []
-wd = 0
-rStr = ['']
-rInt = [[]]
+screen_width = 0
+rStr = []
+rInt = []
 om = ol = []
 v = o = pt = []
-em = pf = fb = 0
+em = pf = fb = vo = fv = du = 0
 h = []
+in_str = ''
+cp = 0
+
 
 def line0():
-    global pg
-    pg = 'miser'
-    global nm
-    nm = '27'
+    global program_name
+    program_name = 'miser'
+    global cursor_issue
+    cursor_issue = '27'
     line62000()
+
 
 def fna(x):
     global ol
     global pt
     return ol[pt[x]]
 
+
 def line20():
-    global wd
-    wd = 80
+    global screen_width
+    screen_width = 80
     global rStr
     global rInt
     global om
@@ -81,17 +88,17 @@ def line20():
         ([39, 0, 0, 0], 'front balcony.  there is a large road below'),
         ([0, 0, 0, 0], '$'),
         ([0, 0, 38, 27], 'master bedroom.  there''s a huge four-poster bed'),
-        ([0, 36, 0, 0], 'rear balcony.  below you see a hedge maze'), 
+        ([0, 36, 0, 0], 'rear balcony.  below you see a hedge maze'),
         ([34, 0, 0, 38], 'east bedroom'),
-        ([0, 33, 0, 0], 'closet'), 
+        ([0, 33, 0, 0], 'closet'),
         ([0, 27, 36, 0], 'junction of the west hallway and the north-south hallway'),
-        ([32, 0, 37, 35], 'center of the north-south hallway'), 
+        ([32, 0, 37, 35], 'center of the north-south hallway'),
         ([0, 38, 0, 36], 'junction of the east hallway and the north-south hallway'),
-        ([37, 39, 33, 31], 'middle of the east hallway'), 
+        ([37, 39, 33, 31], 'middle of the east hallway'),
         ([38, 29, 0, 0], 'south end of east hallway'),
-        ([0, 42, 0, 41], 'hedge maze'), 
+        ([0, 42, 0, 41], 'hedge maze'),
         ([44, 42, 0, 0], 'hedge maze'),
-        ([41, 44, 43, 0], 'hedge maze'), 
+        ([41, 44, 43, 0], 'hedge maze'),
         ([41, 23, 0, 0], 'hedge maze'),
         ([0, 42, 0, 45], 'hedge maze'),
         ([0, 0, 44, 0], 'hedge maze'),
@@ -138,16 +145,251 @@ def line20():
     clear_screen()
     line14000()
 
+
+def line700():
+    print('')
+    sc = sf = 0
+    line60000()
+    in_str.strip()
+    parse = in_str.split()
+    if len(parse) < 1 or len(parse) > 2:
+        print('please type a one or two world command')
+        line700()
+    cv = parse[0]
+    if len(cv) > 4:
+        cv = cv[0:4]
+    i = -1
+    for x in range(len(v)):
+        if cv == v[x]:
+            print(f'command {v[x]} {x}')
+            i = x
+    if i == -1:
+        line50000(cv)
+        line700()
+
+    if len(parse) == 1:
+        j = 0
+    else:
+        co = parse[1]
+        if len(co) > 4:
+            co = co[0:4]
+        j = -1
+        for x in range(len(o)):
+            if co == o[x]:
+                print(f'object {o[x]} {x}')
+                j = x
+        if j == -1:
+            line50000(co)
+            line700()
+    if i == 0 or i == 1:
+        line1000()
+    elif i == 2 or i == 3 or i == 4:
+        line2000()
+    elif i == 5:
+        line4000()
+    elif i == 6:
+        line5000()
+    elif i == 7:
+        line6000()
+    elif i == 8:
+        line7000()
+    elif i == 9:
+        line8000()
+    elif i == 10:
+        line9000()
+    elif i == 11:
+        line10000()
+    elif i == 12:
+        line11000()
+    elif i == 13:
+        line12000()
+    elif i == 14:
+        line14000()
+    elif i == 15:
+        line15000()
+    elif i == 16 or i == 17:
+        line16000()
+    elif i == 18 or i == 19:
+        line17000()
+    elif i == 20 or i == 21:
+        line17010()
+    elif i == 22 or i == 23:
+        line19000()
+    elif i == 24:
+        line20000()
+    elif i == 25:
+        line21000()
+    elif i == 26:
+        line22000()
+    elif i == 27:
+        line24000()
+    elif i == 28:
+        line6000()
+    elif i == 29:
+        line25000()
+
+    line700()
+
+
+def line1000():
+    print('1000 command')
+
+
+def line2000():
+    print('2000 command')
+
+
+def line4000():
+    print('4000 command')
+
+
+def line5000():
+    print('5000 command')
+
+
+def line6000():
+    print('6000 command')
+
+
+def line7000():
+    print('7000 command')
+
+
+def line8000():
+    print('8000 command')
+
+
+def line9000():
+    print('9000 command')
+
+
+def line10000():
+    print('10000 command')
+
+
+def line11000():
+    print('11000 command')
+
+
+def line12000():
+    print('12000 command')
+
+
 def line14000():
-    print('line 14000 - fix me');
+    global in_str
+    global cp
+    in_str = f'you are in the {rStr[cp]}'
+    line53000()
+    line14010()
+
+
+def line14010():
+    for x in ol:
+        if x == cp:
+            global in_str
+            in_str = f'there is a {om[x]} here'
+            line53000()
+        elif x == 1 and ol[1] == cp:
+            print("the pool is full of water")
+    if cp == 25:
+        if pf == 1:
+            print('the pool is full of liquid mercury')
+        elif fb != 0:
+            print('the pool''s empty')
+            if ol[7] == 48:
+                print('i see something shiny in the pool!')
+    if cp == 10 and fb == 1:
+        print('there is a hot fire on the south wall!')
+        print('if I go that way I''ll burn to death!')
+    if cp == 16:
+        in_str = 'a rich, full voice says, ''ritnew is a charming world''.'
+        line53000()
+    if cp == 26:
+        print('there is a valve on one of the pipes.')
+    if cp == 23:
+        print('there is a leaky faucet nearby.')
+    if cp == 10 and fb == 0:
+        print('there is evidence of a recent fire here.')
+    if cp == 5 and fv == 1:
+        print('there is a vault in the east wall.')
+    if cp == 5 and vo == 1:
+        print('the vault is open')
+    if cp == 0 and du == 1:
+        print('an open door leads north.')
+    if cp != 48:
+        print('obvious exits:')
+        if rInt[cp][0] > 0:
+            print('n ', end='')
+        if rInt[cp][1] > 0:
+            print('s ', end='')
+        if rInt[cp][2] > 0:
+            print('e ', end='')
+        if rInt[cp][3] > 0:
+            print('w ', end='')
+        print('')
+    line700()
+
+
+def line15000():
+    print('15000 command')
+
+
+def line16000():
+    print('16000 command')
+
+
+def line17000():
+    print('17000 command')
+
+
+def line17010():
+    print('17010 command')
+
+
+def line19000():
+    print('19000 command')
+
+
+def line20000():
+    print('20000 command')
+
+
+def line21000():
+    print('21000 command')
+
+
+def line22000():
+    print('22000 command')
+
+
+def line24000():
+    print('24000 command')
+
+
+def line25000():
+    print('25000 command')
+
+
+def line50000(foo):
+    print(f"unknown word {foo} - fix me")
+
+
+def line53000():
+    print(in_str)
+
+
+def line60000():
+    global in_str
+    in_str = input()
+
 
 def line60500():
     print(f'*')
-    pass
+
 
 def line62000():
-    print(f'{pg:>12} by m.j. lansing')
-    print(f'   cursor # {nm}  copyright (c) 1981')
+    print(f'{program_name:>12} by m.j. lansing')
+    print(f'   cursor # {cursor_issue}  copyright (c) 1981')
     line60500()
     print('explore the miser''s house   (needs 16k)')
     print('\n\n\npress return to begin')
@@ -155,7 +397,7 @@ def line62000():
     print('\n\none moment please...')
     line20()
 
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     line0()
-

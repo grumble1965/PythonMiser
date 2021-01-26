@@ -84,23 +84,23 @@
 -  620 datacabinet on rollers against one wall over,5,repaired parachute,-2
 -  621 data"sign saying 'drop coins for luck'",19
 -  699 goto14000
-  700 print:sc=0:sf=0:gosub60000:iflen(in$)=0then700
-  720 ifleft$(in$,1)=" "thenin$=right$(in$,len(in$)-1):goto720
-  730 ifright$(in$,1)=" "thenin$=left$(in$,len(in$)-1):goto730
-  735 sp=len(in$)+1:print
-  740 sc=sc+1:ifmid$(in$,sc,1)=" "thensf=sf+1:sp=sc
-  750 ifsc<len(in$)then740
-  760 ifsf>-1andsf<2thengoto780
-  770 print"please type a one or two word command":goto700
-  780 cv$=left$(in$,sp-1):forx=1to30:ifleft$(cv$,4)=v$(x)theni=x:goto800
-  790 nextx:goto50000
-  800 ifsf=0thenco$="":j=0:goto900
-  810 co$=mid$(in$,sp+1,4):forx=1to30:ifco$=o$(x)thenj=x:goto 900
-  820 nextx:goto 50000
-  830 goto700
-  900 onigoto1000,1000,2000,2000,2000,4000,5000,6000,7000,8000,9000,10000
-  910 oni-12goto11000,12000,14000,15000,16000,16000,17000,17000,17010,17010
-  920 oni-22goto19000,19000,20000,21000,22000,24000,6000,25000
+-  700 print:sc=0:sf=0:gosub60000:iflen(in$)=0then700
+-  720 ifleft$(in$,1)=" "thenin$=right$(in$,len(in$)-1):goto720
+-  730 ifright$(in$,1)=" "thenin$=left$(in$,len(in$)-1):goto730
+-  735 sp=len(in$)+1:print
+-  740 sc=sc+1:ifmid$(in$,sc,1)=" "thensf=sf+1:sp=sc
+-  750 ifsc<len(in$)then740
+-  760 ifsf>-1andsf<2thengoto780
+-  770 print"please type a one or two word command":goto700
+-  780 cv$=left$(in$,sp-1):forx=1to30:ifleft$(cv$,4)=v$(x)theni=x:goto800
+-  790 nextx:goto50000
+-  800 ifsf=0thenco$="":j=0:goto900
+-  810 co$=mid$(in$,sp+1,4):forx=1to30:ifco$=o$(x)thenj=x:goto 900
+-  820 nextx:goto 50000
+-  830 goto700
+-  900 onigoto1000,1000,2000,2000,2000,4000,5000,6000,7000,8000,9000,10000
+-  910 oni-12goto11000,12000,14000,15000,16000,16000,17000,17000,17010,17010
+-  920 oni-22goto19000,19000,20000,21000,22000,24000,6000,25000
  1000 ifj=0then50000
  1002 ifpt%(j)=-1thenprint"i am unable to do that.":goto700
  1005 iffna(j)=-1thenprint"you're already carrying it":goto700
@@ -240,32 +240,32 @@
  12310 ifkc=0thenprint"i don't know the combination.":goto700
  12320 print"ok, let's see. 12..35..6..":print"<click!> the door swings open."
  12330 vo=1:r%(5,3)=46:goto699
- 14000 in$="{down}you are in the "+r$(cp)+".":gosub53000:print
- 14010 forx=1to28:ifol%(x)<>cpthen14020
- 14011 in$="there is a "+om$(x)+" here.":print:gosub53000:print
- 14020 ifx=1andbfandol%(1)=cpthenprint"   the bucket is full of water."
- 14030 next x
- 14040 if cp=25andpf then print "{down}the pool is full of liquid mercury!"
- 14050 if cp<>25orpfthen14060
- 14055 print"{down}the pool's empty.":ifol%(7)<>48then14060
- 14056 print "{down}i see something shiny in the pool!"
- 14060 if cp<>10orfb=0then14090
- 14070 print"{down}there is a hot fire on the south wall!"
- 14080 print"if i go that way i'll burn to death!"
- 14090 if cp<>16then14110
- 14100 in$="{down}a rich, full voice says, 'ritnew is a charming word'."
- 14105 gosub53000:print
- 14110 ifcp=26thenprint"{down}there is a valve on one of the pipes."
- 14115 ifcp=23thenprint"{down}there is a leaky faucet nearby."
- 14120 ifcp=10andfb=0thenprint"{down}there is evidence of a recent fire here."
- 14125 ifcp=5andfvthenprint"{down}there is a vault in the east wall."
- 14126 ifcp=5andvothenprint"the vault is open."
- 14127 ifcp=0andduthenprint"{down}an open door leads north."
- 14130 ifcp<>48thenprint"{down}obvious exits:":ifr%(cp,1)>0thenprint"n ";
- 14140 ifr%(cp,2)>0thenprint"s ";
- 14150 ifr%(cp,3)>0thenprint"e ";
- 14160 ifr%(cp,4)>0thenprint"w ";
- 14170 print:goto700
+- 14000 in$="{down}you are in the "+r$(cp)+".":gosub53000:print
+- 14010 forx=1to28:ifol%(x)<>cpthen14020
+- 14011 in$="there is a "+om$(x)+" here.":print:gosub53000:print
+- 14020 ifx=1andbfandol%(1)=cpthenprint"   the bucket is full of water."
+- 14030 next x
+- 14040 if cp=25andpf then print "{down}the pool is full of liquid mercury!"
+- 14050 if cp<>25orpfthen14060
+- 14055 print"{down}the pool's empty.":ifol%(7)<>48then14060
+- 14056 print "{down}i see something shiny in the pool!"
+- 14060 if cp<>10orfb=0then14090
+- 14070 print"{down}there is a hot fire on the south wall!"
+- 14080 print"if i go that way i'll burn to death!"
+- 14090 if cp<>16then14110
+- 14100 in$="{down}a rich, full voice says, 'ritnew is a charming word'."
+- 14105 gosub53000:print
+- 14110 ifcp=26thenprint"{down}there is a valve on one of the pipes."
+- 14115 ifcp=23thenprint"{down}there is a leaky faucet nearby."
+- 14120 ifcp=10andfb=0thenprint"{down}there is evidence of a recent fire here."
+- 14125 ifcp=5andfvthenprint"{down}there is a vault in the east wall."
+- 14126 ifcp=5andvothenprint"the vault is open."
+- 14127 ifcp=0andduthenprint"{down}an open door leads north."
+- 14130 ifcp<>48thenprint"{down}obvious exits:":ifr%(cp,1)>0thenprint"n ";
+- 14140 ifr%(cp,2)>0thenprint"s ";
+- 14150 ifr%(cp,3)>0thenprint"e ";
+- 14160 ifr%(cp,4)>0thenprint"w ";
+- 14170 print:goto700
  15000 ifj<>8andj<>18andj<>28then50000
  15010 if(j=8andcp<>48)or(j=18andcp<>2andcp<>27)or(j=28andcp<>25)then51000
  15020 ifj=8thencp=25:goto699
@@ -337,17 +337,17 @@
  53005 oe=41
  53010 ifmid$(in$,oe,1)<>" "thenoe=oe-1:goto53010
  53020 printleft$(in$,oe):printright$(in$,len(in$)-oe);:return
- 60000 in$=" ":zt=ti:zc=2:zd$=chr$(20)
- 60010 getz$:ifz$<>""then60070
- 60020 ifzt<=tithenprintmid$(" {CBM-+}",zc,1);"{left}";:zc=3-zc:zt=ti+15
- 60030 goto60010
- 60070 z=asc(z$):zl=len(in$):if(zand127)<32thenprint" {left}";:goto60110
- 60090 ifzl>254then60010
- 60100 in$=in$+z$:printz$;zd$;z$;
- 60110 ifz=13thenin$=mid$(in$,2):printcr$;:return
- 60120 ifz=20andzl>1thenin$=left$(in$,zl-1):print"{left}";:goto60010
- 60130 ifz=141thenz$=chr$(-20*(zl>1)):forz=2tozl:printz$;:nextz:goto60000
- 60140 goto60010
+- 60000 in$=" ":zt=ti:zc=2:zd$=chr$(20)
+- 60010 getz$:ifz$<>""then60070
+- 60020 ifzt<=tithenprintmid$(" {CBM-+}",zc,1);"{left}";:zc=3-zc:zt=ti+15
+- 60030 goto60010
+- 60070 z=asc(z$):zl=len(in$):if(zand127)<32thenprint" {left}";:goto60110
+- 60090 ifzl>254then60010
+- 60100 in$=in$+z$:printz$;zd$;z$;
+- 60110 ifz=13thenin$=mid$(in$,2):printcr$;:return
+- 60120 ifz=20andzl>1thenin$=left$(in$,zl-1):print"{left}";:goto60010
+- 60130 ifz=141thenz$=chr$(-20*(zl>1)):forz=2tozl:printz$;:nextz:goto60000
+- 60140 goto60010
 - 60500 fori=1to13:print"{SHIFT-*}{SHIFT-*}{SHIFT-*}";:nexti:print"{left}{inst}{SHIFT-*}":return
 - 62000 poke59468,12
 - 62005 print"{clr}{down}{down}";tab(15-len(pg$));pg$;"  by m.j. lansing
