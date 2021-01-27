@@ -101,11 +101,11 @@
 -  900 onigoto1000,1000,2000,2000,2000,4000,5000,6000,7000,8000,9000,10000
 -  910 oni-12goto11000,12000,14000,15000,16000,16000,17000,17000,17010,17010
 -  920 oni-22goto19000,19000,20000,21000,22000,24000,6000,25000
- 1000 ifj=0then50000
- 1002 ifpt%(j)=-1thenprint"i am unable to do that.":goto700
- 1005 iffna(j)=-1thenprint"you're already carrying it":goto700
- 1010 iffna(j)<>cpthen51000
- 1020 ol%(pt%(j))=-1:print"ok"
+- 1000 ifj=0then50000
+- 1002 ifpt%(j)=-1thenprint"i am unable to do that.":goto700
+- 1005 iffna(j)=-1thenprint"you're already carrying it":goto700
+- 1010 iffna(j)<>cpthen51000
+- 1020 ol%(pt%(j))=-1:print"ok"
  1030 x=pt%(j):if(x>3andx<9)orx=19thenprint"you got a treasure!":gt=gt+1
  1040 ifj=2andol%(20)=-2thenprint"you find a door key!":ol%(20)=0
  1050 goto700
@@ -159,12 +159,12 @@
  5030 ifj=11thenprint"the front cover is inscribed in greek.":goto700
  5040 print"it says, '12-35-6'.":print"hmm.. looks like a combination."
  5050 kc=1:goto700
- 6000 print"you are carrying the following:{down}"
- 6010 fi=0:for x=1to 27:ifol%(x)=-1thenprintom$(x):fi=1
- 6020 ifx=1andbfandol%(1)=-1thenprint"  the bucket is full of water."
- 6025 ifx=14andol%(14)=-1thenprint"  (better fix it)"
- 6030 nextx:iffi=0thenprint"nothing at all."
- 6040 goto700
+- 6000 print"you are carrying the following:{down}"
+- 6010 fi=0:for x=1to 27:ifol%(x)=-1thenprintom$(x):fi=1
+- 6020 ifx=1andbfandol%(1)=-1thenprint"  the bucket is full of water."
+- 6025 ifx=14andol%(14)=-1thenprint"  (better fix it)"
+- 6030 nextx:iffi=0thenprint"nothing at all."
+- 6040 goto700
  7000 print"do you really want to quit now?"
  7001 gosub60000:ifin$=""then7001
  7002 ifleft$(in$,1)<>"y"thenprint:print"{down}ok":goto700
@@ -225,21 +225,21 @@
  11050 ifcp=25andpfthenprint"i'd rather stay away from the mercury.":goto700
  11060 ifcp<>23andcp<>19thenprint"i don't see any water here.":goto700
  11070 print"your bucket is now full.":bf=1:goto700
- 12000 ifj=0then50000
- 12010 ifj<>12andj<>27thenprint"i wouldn't know how to unlock one.":goto700
- 12020 ifcp<>0andcp<>5andcp<>6then51000
- 12030 ifcp=0andj=12then12200
- 12040 ifcp=5andj=27then12300
- 12050 ifcp<>6orj<>12orol%(16)=-2then51000
- 12100 print"the trapdoor has no lock":goto700
- 12200 ifduthenprint"it's already unlocked.":goto700
- 12210 ifol%(20)<>-1thenprint"i need a key.":goto700
- 12220 print"the door easily unlocks and swings open.":du=1:goto699
- 12300 ifvothenprint"it's already open.":goto700
- 12305 iffv=0then51000
- 12310 ifkc=0thenprint"i don't know the combination.":goto700
- 12320 print"ok, let's see. 12..35..6..":print"<click!> the door swings open."
- 12330 vo=1:r%(5,3)=46:goto699
+- 12000 ifj=0then50000
+- 12010 ifj<>12andj<>27thenprint"i wouldn't know how to unlock one.":goto700
+- 12020 ifcp<>0andcp<>5andcp<>6then51000
+- 12030 ifcp=0andj=12then12200
+- 12040 ifcp=5andj=27then12300
+- 12050 ifcp<>6orj<>12orol%(16)=-2then51000
+- 12100 print"the trapdoor has no lock":goto700
+- 12200 ifduthenprint"it's already unlocked.":goto700
+- 12210 ifol%(20)<>-1thenprint"i need a key.":goto700
+- 12220 print"the door easily unlocks and swings open.":du=1:goto699
+- 12300 ifvothenprint"it's already open.":goto700
+- 12305 iffv=0then51000
+- 12310 ifkc=0thenprint"i don't know the combination.":goto700
+- 12320 print"ok, let's see. 12..35..6..":print"<click!> the door swings open."
+- 12330 vo=1:r%(5,3)=46:goto699
 - 14000 in$="{down}you are in the "+r$(cp)+".":gosub53000:print
 - 14010 forx=1to28:ifol%(x)<>cpthen14020
 - 14011 in$="there is a "+om$(x)+" here.":print:gosub53000:print
@@ -277,10 +277,10 @@
  15062 print:goto700
  15070 print"the suits of armor try to stop you,"
  15080 print"but you fight them off with your sword.":cp=27:goto699
- 16000 ifcp=0anddu=0thenprint"the door is locked shut.":goto700
- 16010 ifr%(cp,1)=0then52000
- 16015 ifcp=0thenprint"{down}the door slams shut behind you!"
- 16020 cp=r%(cp,1):goto699
+- 16000 ifcp=0anddu=0thenprint"the door is locked shut.":goto700
+- 16010 ifr%(cp,1)=0then52000
+- 16015 ifcp=0thenprint"{down}the door slams shut behind you!"
+- 16020 cp=r%(cp,1):goto699
  17000 ifcp=10andfbthenprint"you have burnt to a crisp!":end
  17010 ifcp=4andch=0andps=0thenprint"the snake is about to attack!":ps=1:goto700
  17020 ifcp=4andch=0thenprint"the snake bites you!":print"you are dead.":end
@@ -330,13 +330,13 @@
  25050 ifol%(17)<>-1thenprint"i need a ripcord.":goto700
  25060 print"i'm no expert, but i think it'll work."
  25070 ol%(27)=ol%(14):ol%(14)=-2:pt%(17)=27:ol%(17)=0:goto700
- 50000 printh$(em):em=3-em:goto700
- 51000 print"i don't see it here.":goto700
- 52000 print"it's impossible to go that way.":goto700
- 53000 iflen(in$)<=40orwd=80thenprintin$;:return
- 53005 oe=41
- 53010 ifmid$(in$,oe,1)<>" "thenoe=oe-1:goto53010
- 53020 printleft$(in$,oe):printright$(in$,len(in$)-oe);:return
+- 50000 printh$(em):em=3-em:goto700
+- 51000 print"i don't see it here.":goto700
+- 52000 print"it's impossible to go that way.":goto700
+- 53000 iflen(in$)<=40orwd=80thenprintin$;:return
+- 53005 oe=41
+- 53010 ifmid$(in$,oe,1)<>" "thenoe=oe-1:goto53010
+- 53020 printleft$(in$,oe):printright$(in$,len(in$)-oe);:return
 - 60000 in$=" ":zt=ti:zc=2:zd$=chr$(20)
 - 60010 getz$:ifz$<>""then60070
 - 60020 ifzt<=tithenprintmid$(" {CBM-+}",zc,1);"{left}";:zc=3-zc:zt=ti+15

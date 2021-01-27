@@ -17,7 +17,7 @@ rStr = []
 rInt = []
 om = ol = []
 v = o = pt = []
-em = pf = fb = vo = fv = du = 0
+em = pf = fb = vo = fv = du = kc = bf = gt = 0
 h = []
 in_str = ''
 cp = 0
@@ -106,12 +106,16 @@ def line20():
         ([0, 40, 0, 0], 'dungeon.  there is light above and to the south'),
         ([0, 0, 0, 0], 'bottom of the swimming pool.  a ladder leads up and out')
     ]
+    l1 = []
+    l2 = []
     for (xx, yy) in r_int_r_str_data:
-        rInt.append(xx)
-        rStr.append(yy)
+        l1.append(xx)
+        l2.append(yy)
+    rInt = l1
+    rStr = l2
 
     v = ['get', 'take', 'move', 'slid', 'push', 'open', 'read', 'inve', 'quit']
-    v += ['drop', 'say', 'pour', 'fill', 'unlo', 'lock']
+    v += ['drop', 'say', 'pour', 'fill', 'unlo', 'look']
     v += ['go', 'nort', 'n', 'sout', 's', 'east', 'e', 'west', 'w', 'scor', 'turn']
     v += ['jump', 'swim', 'i', 'fix']
 
@@ -123,9 +127,13 @@ def line20():
         ('leaf', 4), ('bag', 5), ('>$<', -1), ('>$<', -1), ('ring', 7),
         ('pain', 8), ('vaul', -1), ('pool', -1), ('xyzz', -1), ('plug', -1)
     ]
+    l1 = []
+    l2 = []
     for (xx, yy) in o_pt_data:
-        o.append(xx)
-        pt.append(yy)
+        l1.append(xx)
+        l2.append(yy)
+    o = l1
+    pt = l2
 
     om_ol_data = [
         ('plastic bucket', 26), ('vicious snake', 4), ('charmed snake', -2), ('*golden leaf*', 45),
@@ -138,9 +146,14 @@ def line20():
         ('open organ in the corner', -2), ('cabinet on rollers against one wall over', 5),
         ('repaired parachute', -2), ('sign saying ''drop coins for luck''', 19)
     ]
+    l1 = []
+    l2 = []
     for (xx, yy) in om_ol_data:
-        om.append(xx)
-        ol.append(yy)
+        # print('xx = ', xx, 'yy = ', yy)
+        l1.append(xx)
+        l2.append(yy)
+    om = l1
+    ol = l2
 
     clear_screen()
     line14000()
@@ -177,12 +190,12 @@ def line700():
         for x in range(len(o)):
             if co == o[x]:
                 print(f'object {o[x]} {x}')
-                j = x
+                j = x + 1
         if j == -1:
             line50000(co)
             line700()
     if i == 0 or i == 1:
-        line1000()
+        line1000(j)
     elif i == 2 or i == 3 or i == 4:
         line2000()
     elif i == 5:
@@ -202,7 +215,7 @@ def line700():
     elif i == 12:
         line11000()
     elif i == 13:
-        line12000()
+        line12000(j)
     elif i == 14:
         line14000()
     elif i == 15:
@@ -231,50 +244,156 @@ def line700():
     line700()
 
 
-def line1000():
-    print('1000 command')
+# get, take object
+def line1000(obj):
+    global pt
+    global cp
+    global ol
+    global gt
+    if obj == 0:
+        line50000('what?')
+    if pt[obj] == -1:
+        print('i am unable to do that.')
+        line700()
+    elif fna(obj) == -1:
+        print("you're already carrying it")
+        line700()
+    elif fna(obj) != cp:
+        line51000()
+
+    ol[pt[obj]] = -1
+    print('ok')
+
+    if (3 < pt[obj] < 9) or pt[obj] == 19:
+        print('you got a treasure!')
+        gt += 1
+    if obj == 2 and ol[20] == -2:
+        print('you find a door key!')
+        ol[20] = 0
+    line700()
 
 
+# move, slide, push
 def line2000():
     print('2000 command')
 
 
+# open
 def line4000():
     print('4000 command')
 
 
+# read
 def line5000():
     print('5000 command')
 
 
+# inventory
 def line6000():
+    global ol
+    global om
+    global bf
     print('6000 command')
+    print('you are carrying the following:')
+    fi = 0
+    for x in range(len(ol)):
+        if ol[x] == -1:
+            print(om[x])
+            fi = 1
+        if x == 1 and bf == 1 and ol[1] == -1:
+            print('  the bucket is full of water.')
+        if x == 14 and ol[14] == -1:
+            print('   (better fix it)')
+    if fi == 0:
+        print('nothing at all.')
+    line700()
 
 
+# quit
 def line7000():
     print('7000 command')
 
 
+# drop
 def line8000():
     print('8000 command')
 
 
+# say
 def line9000():
     print('9000 command')
 
 
+# pour
 def line10000():
     print('10000 command')
 
 
+# fill
 def line11000():
     print('11000 command')
 
 
-def line12000():
+# unlock object
+def line12000(obj):
+    global cp
+    global ol
     print('12000 command')
+    if obj == 0:
+        line50000('what?')
+    elif obj != 12 and obj != 27:
+        print("i wouldn't know how to unlock one.")
+        line700()
+    elif cp != 0 and cp != 5 and cp != 6:
+        line51000()
+    elif cp == 0 and obj == 12:
+        line12200()
+    elif cp == 5 and obj == 27:
+        line12300()
+    elif cp != 6 or obj != 12 or ol[16] != -2:
+        line51000()
+    else:
+        print('the trapdoor has no lock')
+    line700()
 
 
+def line12200():
+    global du
+    global ol
+    if du == 1:
+        print('it''s already unlocked.')
+        line700()
+    elif ol[20] != -1:
+        print('i need a key.')
+        line700()
+    else:
+        print('the door easily unlocks and swings open.')
+        du = 1
+        line14000()
+
+
+def line12300():
+    global vo
+    global fv
+    global kc
+    global rInt
+    if vo == 1:
+        print('it''s already open.')
+        line700()
+    elif fv == 0:
+        line51000()
+    elif kc == 0:
+        print('i don''t know the combination.')
+        line700()
+    else:
+        print('ok, let''s see.  12..35..6..')
+        print('<click!> the door swings open.')
+        vo = 1
+        rInt[5][2] = 46
+        line14000()
+
+
+# look
 def line14000():
     global in_str
     global cp
@@ -330,52 +449,92 @@ def line14010():
     line700()
 
 
+# go
 def line15000():
     print('15000 command')
 
 
+# north
 def line16000():
-    print('16000 command')
+    global cp
+    global du
+    global rInt
+    if cp == 0 and du == 0:
+        print('the door is locked shut.')
+        line700()
+    elif rInt[cp][0] == 0:
+        line52000()
+    elif cp == 0:
+        print('the door slams shut behind you!')
+    cp = rInt[cp][0]
+    line14000()
 
 
+# south
 def line17000():
     print('17000 command')
 
 
+# east
 def line17010():
     print('17010 command')
 
 
+# west
 def line19000():
     print('19000 command')
 
 
+# score
 def line20000():
     print('20000 command')
 
 
+# turn
 def line21000():
     print('21000 command')
 
 
+# jump
 def line22000():
     print('22000 command')
 
 
+# swim
 def line24000():
     print('24000 command')
 
 
+# fix
 def line25000():
     print('25000 command')
 
 
 def line50000(foo):
-    print(f"unknown word {foo} - fix me")
+    global em
+    print(f'{foo}?  {h[em]}')
+    em = 1 - em
+    line700()
+
+def line51000():
+    print('i don''t see it here')
+    line700()
+
+
+def line52000():
+    print('it''s impossible to go that way.')
+    line700()
 
 
 def line53000():
-    print(in_str)
+    global in_str
+    global screen_width
+    if len(in_str) < screen_width:
+        print(in_str)
+    else:
+        last_space_index = in_str.rfind(' ', 0, screen_width)
+        print(in_str[:last_space_index])
+        print(in_str[last_space_index+1:])
 
 
 def line60000():
