@@ -17,7 +17,7 @@ rStr = []
 rInt = []
 om = ol = []
 v = o = pt = []
-em = pf = fb = vo = fv = du = kc = bf = gt = 0
+em = pf = fb = vo = fv = du = kc = bf = gt = gg = es = 0
 h = []
 in_str = ''
 cp = 0
@@ -54,7 +54,7 @@ def line20():
     global fb
     fb = 1
     global h
-    h = ['what?', 'i don''t understand that']
+    h = ['what?', "i don't understand that"]
     r_int_r_str_data = [
         ([1, 0, 0, 0], 'front porch'),
         ([2, 0, 0, 12], 'foyer to a large house.  dust is everywhere'),
@@ -156,6 +156,10 @@ def line20():
     ol = l2
 
     clear_screen()
+    line699()
+
+
+def line699():
     line14000()
 
 
@@ -199,9 +203,9 @@ def line700():
     elif i == 2 or i == 3 or i == 4:
         line2000()
     elif i == 5:
-        line4000()
+        line4000(j)
     elif i == 6:
-        line5000()
+        line5000(j)
     elif i == 7:
         line6000()
     elif i == 8:
@@ -261,7 +265,10 @@ def line1000(obj):
     elif fna(obj) != cp:
         line51000()
 
-    ol[pt[obj]] = -1
+    # print('obj = ', obj)
+    # print('pt = ', pt)
+    # print('ol = ', ol)
+    ol[pt[obj-1]] = -1
     print('ok')
 
     if (3 < pt[obj] < 9) or pt[obj] == 19:
@@ -279,13 +286,127 @@ def line2000():
 
 
 # open
-def line4000():
+def line4000(obj):
+    global in_str
     print('4000 command')
+    if obj == 0:
+        line50000('open what?')
+    elif obj != 11:
+        line4030(obj)
+    elif fna[obj] != cp and fna(obj) != -1:
+        line4030(obj)
+    else:
+        in_str = "scrawled in blood on the inside front cover is the message,"
+        line53000()
+        print("''victory' is a prize-winning word'.")
+    line700()
+
+def line4030(obj):
+    global cp
+    global du
+    global in_str
+    print('line4030')
+    if obj == 7:
+        print('try turning it.')
+        line700()
+    elif obj != 12:
+        line4120(obj)
+    elif cp == 0 and du == 0:
+        print('sorry, the door is locked.')
+        line700()
+    elif cp == 0 and du == 1:
+        print("it's already open.")
+        line700()
+    elif cp != 6:
+        line51000()
+    else:
+        in_str = 'you open the door. you lean over to peer in, and you fall in!'
+        line53000()
+        cp = 47
+        line699()
+
+
+def line4120(obj):
+    global cp
+    global in_str
+    if obj != 13:
+        line4160(obj)
+    elif ol[26] != cp:
+        line51000()
+    else:
+        print('the cabinet is empty and dusty.')
+        in_str = "scribbled in the dust on one shelf are the words, 'behind me'."
+        line53000()
+    line700()
+
+
+def line4160(obj):
+    global cp
+    if obj != 22:
+        line4190(obj)
+    elif fna(obj) != cp and fna(obj) != -1:
+        line51000()
+    else:
+        print('the bag is knotted securely.')
+        print("it won't open.")
+        line700()
+
+
+def line4190(obj):
+    global cp
+    global fv
+    if obj != 27:
+        line4230(obj)
+    elif cp != 5 or fv == 0:
+        line51000()
+    elif vo == 1:
+        print("it's already open.")
+    else:
+        print("i can't, it's locked.")
+    line700()
+
+
+def line4230(obj):
+    global gg
+    global ol
+    if obj != 16:
+        print("i don't know how to open that.")
+    elif cp != 21:
+        line51000()
+    elif gg == 0:
+        print("it's stuck shut.")
+    elif ol[24] == -2:
+        print("it's already open.")
+    else:
+        print('as you open it, several objects suddenly appear!')
+        ol[24] = -2
+        ol[25] = 21
+        ol[19] = 21
+        ol[17] = 21
+        line699()
+    line700()
 
 
 # read
-def line5000():
+def line5000(obj):
     print('5000 command')
+    global cp
+    global kc
+    if obj == 0:
+        line50000('read what?')
+    if pt[obj] > -1 and fna(obj) != cp and fna(obj) != -1:
+        line51000()
+    elif pt[obj] == -1:
+        print("there's nothing written on that.")
+    elif obj != 3 and obj != 11:
+        print("there's nothing written on that.")
+    elif obj == 11:
+        print('the front cover is inscribed in greek.')
+    else:
+        print("it says, '12-35-6'.")
+        print('hmm.. looks like a combination.')
+        kc = 1
+    line700()
 
 
 # inventory
@@ -293,12 +414,13 @@ def line6000():
     global ol
     global om
     global bf
-    print('6000 command')
     print('you are carrying the following:')
     fi = 0
+    # print('ol = ', ol)
+    # print('om = ', om)
     for x in range(len(ol)):
         if ol[x] == -1:
-            print(om[x])
+            print(om[x-1])
             fi = 1
         if x == 1 and bf == 1 and ol[1] == -1:
             print('  the bucket is full of water.')
@@ -311,7 +433,47 @@ def line6000():
 
 # quit
 def line7000():
+    global in_str
     print('7000 command')
+    print('do you indeed wish to quit now?')
+    line60000()
+    if in_str[0].lower() != 'y':
+        print('ok')
+        line700()
+    else:
+        clear_screen()
+        line7010()
+
+
+def line7010():
+    global gt
+    global es
+    print('7010 command')
+    print('you accumulated', gt, 'treasures,')
+    print('for a score of', gt * 20, 'points.')
+    print('(100 possible)')
+    if es == 0:
+        print('however, you did not escape.')
+    print('this puts you in a class of:')
+    if es == 1:
+        gt += 1
+    if gt == 0:
+        print('<beginner adventurer>')
+    elif gt == 1:
+        print('<amateur adventurer>')
+    elif gt == 2:
+        print('<journeyman adventurer>')
+    elif gt == 3:
+        print('<experienced adventurer>')
+    elif gt == 4:
+        print('<professional adventurer>')
+    elif gt == 5:
+        print('<master adventurer>')
+    else:
+        print('<grandmaster adventurer>')
+    if gt < 6:
+        print('better luck next time!')
+    exit(0)
 
 
 # drop
@@ -487,7 +649,23 @@ def line19000():
 
 # score
 def line20000():
+    global gt
+    global in_str
     print('20000 command')
+    print('if you were to quit now,')
+    print('you would have a score of')
+    print(gt * 20, 'points.')
+    print('(100 possible)')
+    while True:
+        print('do you indeed wish to quit now?')
+        line60000()
+        if in_str[0].lower() == 'y':
+            line7010()
+        elif in_str[0].lower() == 'n':
+            print('ok')
+            print()
+            break
+    line700()
 
 
 # turn
@@ -510,19 +688,19 @@ def line25000():
     print('25000 command')
 
 
-def line50000(foo):
+def line50000(unknown_object):
     global em
-    print(f'{foo}?  {h[em]}')
+    print(f'{unknown_object}?  {h[em]}')
     em = 1 - em
     line700()
 
 def line51000():
-    print('i don''t see it here')
+    print("i don't see it here")
     line700()
 
 
 def line52000():
-    print('it''s impossible to go that way.')
+    print("it's impossible to go that way.")
     line700()
 
 
@@ -543,14 +721,14 @@ def line60000():
 
 
 def line60500():
-    print(f'*')
+    print('*' * 40)
 
 
 def line62000():
     print(f'{program_name:>12} by m.j. lansing')
     print(f'   cursor # {cursor_issue}  copyright (c) 1981')
     line60500()
-    print('explore the miser''s house   (needs 16k)')
+    print("explore the miser's house   (needs 16k)")
     print('\n\n\npress return to begin')
     wait_for_keypress()
     print('\n\none moment please...')

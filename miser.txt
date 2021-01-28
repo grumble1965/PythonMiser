@@ -121,68 +121,68 @@
  2110 fv=1:goto699
  2200 print"you find a trap door!"
  2210 ol%(16)=6:goto699
- 4000 ifj=0then50000
- 4002 ifj<>11then4030
- 4005 if(fna(j)<>cp)and(fna(j)<>-1)then4030
- 4010 in$="scrawled in blood on the inside front cover is the message,"
- 4011 gosub53000:print
- 4020 print"''victory' is a prize-winning word'.":goto700
- 4030 ifj=7thenprint"try turning it.":goto700
- 4040 ifj<>12then4120
- 4050 ifcp=0anddu=0thenprint"sorry, the door is locked.":goto700
- 4060 ifcp=0andduthenprint"it's already open.":goto700
- 4070 ifcp<>6then51000
- 4080 in$="you open the door. you lean over to peer in, and you fall in!"
- 4090 gosub53000:cp=47:print:goto699
- 4120 ifj<>13then4160
- 4130 ifol%(26)<>cpthen51000
- 4140 print"the cabinet is empty and dusty."
- 4150 in$="scribbled in dust on one shelf are the words, 'behind me'."
- 4155 gosub53000:print:goto700
- 4160 ifj<>22then4190
- 4170 iffna(j)<>cpandfna(j)<>-1then51000
- 4180 print"the bag is knotted securely.":print"it won't open.":goto700
- 4190 ifj<>27then4230
- 4200 ifcp<>5orfv=0then51000
- 4210 ifvothenprint"it's already open.":goto700
- 4220 print"i can't, it's locked.":goto700
- 4230 ifj<>16thenprint"i don't know how to open that.":goto700
- 4232 ifcp<>21then51000
- 4235 ifgg=0thenprint"it's stuck shut.":goto700
- 4240 ifol%(24)=-2thenprint"it's already open.":goto700
- 4250 print"as you open it, several objects":print"suddenly appear!"
- 4260 ol%(24)=-2:ol%(25)=21:ol%(19)=21:ol%(17)=21:goto699
- 5000 ifj=0then50000
- 5005 ifpt%(j)>-1theniffna(j)<>cpandfna(j)<>-1then51000
- 5010 ifpt%(j)=-1thenprint"there's nothing written on that.":goto700
- 5020 ifj<>3andj<>11thenprint"there's nothing written on that.":goto700
- 5030 ifj=11thenprint"the front cover is inscribed in greek.":goto700
- 5040 print"it says, '12-35-6'.":print"hmm.. looks like a combination."
- 5050 kc=1:goto700
+- 4000 ifj=0then50000
+- 4002 ifj<>11then4030
+- 4005 if(fna(j)<>cp)and(fna(j)<>-1)then4030
+- 4010 in$="scrawled in blood on the inside front cover is the message,"
+- 4011 gosub53000:print
+- 4020 print"''victory' is a prize-winning word'.":goto700
+- 4030 ifj=7thenprint"try turning it.":goto700
+- 4040 ifj<>12then4120
+- 4050 ifcp=0anddu=0thenprint"sorry, the door is locked.":goto700
+- 4060 ifcp=0andduthenprint"it's already open.":goto700
+- 4070 ifcp<>6then51000
+- 4080 in$="you open the door. you lean over to peer in, and you fall in!"
+- 4090 gosub53000:cp=47:print:goto699
+- 4120 ifj<>13then4160
+- 4130 ifol%(26)<>cpthen51000
+- 4140 print"the cabinet is empty and dusty."
+- 4150 in$="scribbled in dust on one shelf are the words, 'behind me'."
+- 4155 gosub53000:print:goto700
+- 4160 ifj<>22then4190
+- 4170 iffna(j)<>cpandfna(j)<>-1then51000
+- 4180 print"the bag is knotted securely.":print"it won't open.":goto700
+- 4190 ifj<>27then4230
+- 4200 ifcp<>5orfv=0then51000
+- 4210 ifvothenprint"it's already open.":goto700
+- 4220 print"i can't, it's locked.":goto700
+- 4230 ifj<>16thenprint"i don't know how to open that.":goto700
+- 4232 ifcp<>21then51000
+- 4235 ifgg=0thenprint"it's stuck shut.":goto700
+- 4240 ifol%(24)=-2thenprint"it's already open.":goto700
+- 4250 print"as you open it, several objects":print"suddenly appear!"
+- 4260 ol%(24)=-2:ol%(25)=21:ol%(19)=21:ol%(17)=21:goto699
+- 5000 ifj=0then50000
+- 5005 ifpt%(j)>-1theniffna(j)<>cpandfna(j)<>-1then51000
+- 5010 ifpt%(j)=-1thenprint"there's nothing written on that.":goto700
+- 5020 ifj<>3andj<>11thenprint"there's nothing written on that.":goto700
+- 5030 ifj=11thenprint"the front cover is inscribed in greek.":goto700
+- 5040 print"it says, '12-35-6'.":print"hmm.. looks like a combination."
+- 5050 kc=1:goto700
 - 6000 print"you are carrying the following:{down}"
 - 6010 fi=0:for x=1to 27:ifol%(x)=-1thenprintom$(x):fi=1
 - 6020 ifx=1andbfandol%(1)=-1thenprint"  the bucket is full of water."
 - 6025 ifx=14andol%(14)=-1thenprint"  (better fix it)"
 - 6030 nextx:iffi=0thenprint"nothing at all."
 - 6040 goto700
- 7000 print"do you really want to quit now?"
- 7001 gosub60000:ifin$=""then7001
- 7002 ifleft$(in$,1)<>"y"thenprint:print"{down}ok":goto700
- 7005 print"{clr}"
- 7010 print"{down}you accumulated";gt;"treasures,"
- 7020 print"for a score of";gt*20;"points."
- 7030 print"(100 possible)":ifes=0thenprint"{down}however, you did not escape."
- 7040 print"{down}this puts you in a class of:":ifesthengt=gt+1
- 7050 ongt+1goto7060,7070,7075,7090,7100,7110,7115
- 7060 print"<beginner adventurer>":goto7120
- 7070 print"<amateur adventurer>":goto7120
- 7075 print"<journeyman adventurer>":goto7120
- 7090 print"<experienced adventurer>":goto7120
- 7100 print"<pro adventurer>":goto7120
- 7110 print"<master adventurer>":goto7120
- 7115 print"<grandmaster adventurer>"
- 7120 ifgt<>6thenprint"{down}better luck next time!"
- 7150 end
+- 7000 print"do you really want to quit now?"
+- 7001 gosub60000:ifin$=""then7001
+- 7002 ifleft$(in$,1)<>"y"thenprint:print"{down}ok":goto700
+- 7005 print"{clr}"
+- 7010 print"{down}you accumulated";gt;"treasures,"
+- 7020 print"for a score of";gt*20;"points."
+- 7030 print"(100 possible)":ifes=0thenprint"{down}however, you did not escape."
+- 7040 print"{down}this puts you in a class of:":ifesthengt=gt+1
+- 7050 ongt+1goto7060,7070,7075,7090,7100,7110,7115
+- 7060 print"<beginner adventurer>":goto7120
+- 7070 print"<amateur adventurer>":goto7120
+- 7075 print"<journeyman adventurer>":goto7120
+- 7090 print"<experienced adventurer>":goto7120
+- 7100 print"<pro adventurer>":goto7120
+- 7110 print"<master adventurer>":goto7120
+- 7115 print"<grandmaster adventurer>"
+- 7120 ifgt<>6thenprint"{down}better luck next time!"
+- 7150 end
  8000 iffna(j)<>-1thenprint"you aren't carrying it!":goto700
  8010 x=pt%(j):if(x>3andx<9)orx=19thenprint"don't drop *treasures*!":goto700
  8020 ifcp=19andj=19then8100
@@ -289,13 +289,13 @@
  17050 cp=r%(cp,d):goto699
  19000 ifr%(cp,4)=0then52000
  19010 cp=r%(cp,4):goto699
- 20000 print:print"if you were to quit now,":print"you would have a score of";
- 20010 printgt*20;"points.":print"(100 possible){down}"
- 20020 print"do you indeed wish to quit now? ";
- 20030 gosub60000
- 20040 print:ifleft$(in$,1)="y" then 7010
- 20050 ifleft$(in$,1)<>"n"thenprint"please answer yes or no":goto20020
- 20060 print"ok":print:goto700
+- 20000 print:print"if you were to quit now,":print"you would have a score of";
+- 20010 printgt*20;"points.":print"(100 possible){down}"
+- 20020 print"do you indeed wish to quit now? ";
+- 20030 gosub60000
+- 20040 print:ifleft$(in$,1)="y" then 7010
+- 20050 ifleft$(in$,1)<>"n"thenprint"please answer yes or no":goto20020
+- 20060 print"ok":print:goto700
  21000 ifj<>7thenprint"i don't know how to turn such a thing.":goto700
  21010 ifcp<>26then51000
  21020 in$="with much effort, you turn the valve 5 times. you hear the sound "
