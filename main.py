@@ -24,7 +24,7 @@ om = []
 verbs = o = []
 pool_flooded_flag = bucket_full_flag = fire_burning_flag = vault_open_flag = False
 fv = du = kc = gt = gg = es = ch = ps = jm = po = 0
-cp = 0
+current_position = 0
 
 
 def line0():
@@ -161,7 +161,6 @@ def line699():
 
 def line700():
     print()
-    sc = sf = 0
     input_str = get_input()
     input_str.strip()
     parse = input_str.split()
@@ -169,6 +168,7 @@ def line700():
         print('please type a one or two world command')
         line700()
     command_verb = parse[0]
+    command_object = 'unassigned'
     if len(command_verb) > 4:
         command_verb = command_verb[0:4]
     verb_index = -1
@@ -247,7 +247,7 @@ def line700():
 # get, take object
 def get_take_command(obj):
     global pt
-    global cp
+    global current_position
     global ol
     global gt
     if obj == 0:
@@ -256,7 +256,7 @@ def get_take_command(obj):
         print('i am unable to do that.')
     elif fna(obj) == -1:
         print("you're already carrying it")
-    elif fna(obj) != cp:
+    elif fna(obj) != current_position:
         error_not_here()
     else:
         # print('obj = ', obj)
@@ -278,7 +278,7 @@ def get_take_command(obj):
 
 # move, slide, push
 def move_slide_push_command(obj):
-    global cp
+    global current_position
     global rInt
     global pt
     global ol
@@ -286,13 +286,13 @@ def move_slide_push_command(obj):
     print('2000 command')
     if obj == 0:
         error_unknown_object('move what?')
-    elif obj == 13 and cp == 5 and rInt[5][3] == 0:
+    elif obj == 13 and current_position == 5 and rInt[5][3] == 0:
         print('behind the cabinet is a vault!')
         fv = 1
         line699()
     elif pt[obj] == -1:
         print('that item stays put.')
-    elif fna(obj) != cp and fna(obj) != -1:
+    elif fna(obj) != current_position and fna(obj) != -1:
         error_not_here()
     elif obj == 2 and ol[20] == -2:
         # line 1040
@@ -314,7 +314,7 @@ def open_command(obj):
         error_unknown_object('open what?')
     elif obj != 11:
         line4030(obj)
-    elif fna[obj] != cp and fna(obj) != -1:
+    elif fna(obj) != current_position and fna(obj) != -1:
         line4030(obj)
     else:
         wrap_string("scrawled in blood on the inside front cover is the message,")
@@ -323,7 +323,7 @@ def open_command(obj):
 
 
 def line4030(obj):
-    global cp
+    global current_position
     global du
     print('line4030')
     if obj == 7:
@@ -331,25 +331,25 @@ def line4030(obj):
         line700()
     elif obj != 12:
         line4120(obj)
-    elif cp == 0 and du == 0:
+    elif current_position == 0 and du == 0:
         print('sorry, the door is locked.')
         line700()
-    elif cp == 0 and du == 1:
+    elif current_position == 0 and du == 1:
         print("it's already open.")
         line700()
-    elif cp != 6:
+    elif current_position != 6:
         error_not_here()
     else:
         wrap_string('you open the door. you lean over to peer in, and you fall in!')
-        cp = 47
+        current_position = 47
         line699()
 
 
 def line4120(obj):
-    global cp
+    global current_position
     if obj != 13:
         line4160(obj)
-    elif ol[26] != cp:
+    elif ol[26] != current_position:
         error_not_here()
     else:
         print('the cabinet is empty and dusty.')
@@ -358,10 +358,10 @@ def line4120(obj):
 
 
 def line4160(obj):
-    global cp
+    global current_position
     if obj != 22:
         line4190(obj)
-    elif fna(obj) != cp and fna(obj) != -1:
+    elif fna(obj) != current_position and fna(obj) != -1:
         error_not_here()
     else:
         print('the bag is knotted securely.')
@@ -370,12 +370,12 @@ def line4160(obj):
 
 
 def line4190(obj):
-    global cp
+    global current_position
     global fv
     global vault_open_flag
     if obj != 27:
         line4230(obj)
-    elif cp != 5 or fv == 0:
+    elif current_position != 5 or fv == 0:
         error_not_here()
     elif vault_open_flag:
         print("it's already open.")
@@ -389,7 +389,7 @@ def line4230(obj):
     global ol
     if obj != 16:
         print("i don't know how to open that.")
-    elif cp != 21:
+    elif current_position != 21:
         error_not_here()
     elif gg == 0:
         print("it's stuck shut.")
@@ -408,11 +408,11 @@ def line4230(obj):
 # read
 def read_command(obj):
     print('5000 command')
-    global cp
+    global current_position
     global kc
     if obj == 0:
         error_unknown_object('read what?')
-    if pt[obj] > -1 and fna(obj) != cp and fna(obj) != -1:
+    if pt[obj] > -1 and fna(obj) != current_position and fna(obj) != -1:
         error_not_here()
     elif pt[obj] == -1:
         print("there's nothing written on that.")
@@ -495,7 +495,7 @@ def final_stats():
 
 # drop
 def drop_command(obj):
-    global cp
+    global current_position
     global ol
     global om
     global pt
@@ -509,12 +509,12 @@ def drop_command(obj):
         x = pt[obj]
         if (3 < x < 9) or x == 19:
             print("don't drop *treasures*!")
-        elif cp == 19 and obj == 19:
+        elif current_position == 19 and obj == 19:
             wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
             print('a chapel with dancers appears.')
             rInt[21][3] = 22
             ol[12] = -2
-        elif cp == 22 and obj == 20:
+        elif current_position == 22 and obj == 20:
             wrap_string('even before it hits the ground, the cross fades away!')
             print('the tablet has disintegrated.')
             print('you hear music from the organ.')
@@ -523,14 +523,14 @@ def drop_command(obj):
             rStr[22] = 'chapel'
             om[24] = 'closed organ playing music in the corner'
         else:
-            ol[pt[obj]] = cp
+            ol[pt[obj]] = current_position
             print('ok')
     line700()
 
 
 # say
 def say_command(obj, word):
-    global cp
+    global current_position
     global ch
     global ol
     global po
@@ -539,7 +539,7 @@ def say_command(obj, word):
     if obj == 0:
         print('say what???')
     elif obj == 14:
-        if cp != 4 or ch == 1:
+        if current_position != 4 or ch == 1:
             print('nothing happens.')
         else:
             wrap_string('the snake is charmed by the very utterance of your words.')
@@ -547,7 +547,7 @@ def say_command(obj, word):
             ol[2] = -2
             ol[3] = 4
     elif obj == 15:
-        if cp != 8 or po == 1:
+        if current_position != 8 or po == 1:
             print('nothing happens.')
         else:
             print('a portal has opened in the north wall!!')
@@ -566,19 +566,19 @@ def say_command(obj, word):
 # pour
 def pour_command(obj):
     global ol
-    global cp
+    global current_position
     global bucket_full_flag
     global fire_burning_flag
     print('10000 command')
     if obj != 4:
         print("i wouldn't know how.")
-    elif ol[1] != -1 and ol[1] != cp:
+    elif ol[1] != -1 and ol[1] != current_position:
         error_not_here()
     elif not bucket_full_flag:
         print('the bucket is already empty')
-    elif cp == 19:
+    elif current_position == 19:
         print('ok')
-    elif cp != 10 or not fire_burning_flag:
+    elif current_position != 10 or not fire_burning_flag:
         print('the water disappears quickly.')
         bucket_full_flag = 0
     else:
@@ -593,23 +593,23 @@ def pour_command(obj):
 # fill
 def fill_command(obj):
     global pt
-    global cp
+    global current_position
     global bucket_full_flag
     global pool_flooded_flag
     print('11000 command')
     if obj == 0:
-        error_unknown_object()
+        error_unknown_object('what?')
     elif pt[obj] == -1:
         print("that wouldn't hold anything.")
-    elif fna(obj) != cp and fna(obj) != -1:
+    elif fna(obj) != current_position and fna(obj) != -1:
         error_not_here()
     elif obj != 4:
         print("that wouldn't hold anything.")
     elif bucket_full_flag:
         print("it's already full.")
-    elif cp == 25 and pool_flooded_flag:
+    elif current_position == 25 and pool_flooded_flag:
         print("i'd rather stay away from the mercury.")
-    elif cp != 23 and cp != 19:
+    elif current_position != 23 and current_position != 19:
         print("i don't see any water here.")
     else:
         print('your bucket is now full.')
@@ -619,7 +619,7 @@ def fill_command(obj):
 
 # unlock object
 def unlock_command(obj):
-    global cp
+    global current_position
     global ol
     print('12000 command')
     if obj == 0:
@@ -627,13 +627,13 @@ def unlock_command(obj):
     elif obj != 12 and obj != 27:
         print("i wouldn't know how to unlock one.")
         line700()
-    elif cp != 0 and cp != 5 and cp != 6:
+    elif current_position != 0 and current_position != 5 and current_position != 6:
         error_not_here()
-    elif cp == 0 and obj == 12:
+    elif current_position == 0 and obj == 12:
         line12200()
-    elif cp == 5 and obj == 27:
+    elif current_position == 5 and obj == 27:
         line12300()
-    elif cp != 6 or obj != 12 or ol[16] != -2:
+    elif current_position != 6 or obj != 12 or ol[16] != -2:
         error_not_here()
     else:
         print('the trapdoor has no lock')
@@ -678,7 +678,7 @@ def line12300():
 
 # look
 def look_command():
-    global cp
+    global current_position
     global rStr
     global rInt
     global om
@@ -688,45 +688,45 @@ def look_command():
     global fv
     global vault_open_flag
     global du
-    wrap_string(f'you are in the {rStr[cp]}')
+    wrap_string(f'you are in the {rStr[current_position]}')
     for x in ol:
-        if x == cp:
+        if x == current_position:
             wrap_string(f'there is a {om[x]} here')
-        if x == 1 and bucket_full_flag and ol[1] == cp:
+        if x == 1 and bucket_full_flag and ol[1] == current_position:
             print("the bucket is full of water")
-    if cp == 25:
+    if current_position == 25:
         if pool_flooded_flag:
             print('the pool is full of liquid mercury')
         else:
             print("the pool's empty")
             if ol[7] == 48:
                 print('i see something shiny in the pool!')
-    if cp == 10 and fire_burning_flag:
+    if current_position == 10 and fire_burning_flag:
         print('there is a hot fire on the south wall!')
         print('if I go that way I''ll burn to death!')
-    if cp == 16:
+    if current_position == 16:
         wrap_string("a rich, full voice says, 'ritnew is a charming word'.")
-    if cp == 26:
+    if current_position == 26:
         print('there is a valve on one of the pipes.')
-    if cp == 23:
+    if current_position == 23:
         print('there is a leaky faucet nearby.')
-    if cp == 10 and not fire_burning_flag:
+    if current_position == 10 and not fire_burning_flag:
         print('there is evidence of a recent fire here.')
-    if cp == 5 and fv == 1:
+    if current_position == 5 and fv == 1:
         print('there is a vault in the east wall.')
-    if cp == 5 and vault_open_flag:
+    if current_position == 5 and vault_open_flag:
         print('the vault is open')
-    if cp == 0 and du == 1:
+    if current_position == 0 and du == 1:
         print('an open door leads north.')
-    if cp != 48:
+    if current_position != 48:
         print('obvious exits:')
-        if rInt[cp][0] > 0:
+        if rInt[current_position][0] > 0:
             print('n ', end='')
-        if rInt[cp][1] > 0:
+        if rInt[current_position][1] > 0:
             print('s ', end='')
-        if rInt[cp][2] > 0:
+        if rInt[current_position][2] > 0:
             print('e ', end='')
-        if rInt[cp][3] > 0:
+        if rInt[current_position][3] > 0:
             print('w ', end='')
         print('')
     line700()
@@ -734,29 +734,33 @@ def look_command():
 
 # go
 def go_command(obj):
-    global cp
+    global current_position
     global ol
     print('15000 command')
     if obj != 8 and obj != 18 and obj != 28:
         error_unknown_object('what?')
-    elif (obj == 8 and cp != 48) or (obj == 18 and cp != 2 and cp != 27) or (obj == 28 and cp != 25):
+    elif obj == 8 and current_position != 48:
+        error_not_here()
+    elif obj == 18 and current_position != 2 and current_position != 27:
+        error_not_here()
+    elif obj == 28 and current_position != 25:
         error_not_here()
     elif obj == 8:
-        cp = 25
+        current_position = 25
         line699()
     elif obj == 28 and pool_flooded_flag:
         print('the pool is full of mercury!')
         line700()
     elif obj == 28:
-        cp = 48
+        current_position = 48
         line700()
-    elif cp == 27:
-        cp = 2
+    elif current_position == 27:
+        current_position = 2
         line699()
     elif ol[9] == -1:
         print('the suits of armor try to stop you,')
         print('but you fight them off with your sword.')
-        cp = 27
+        current_position = 27
         line699()
     else:
         wrap_string('the suits of armor prevent you from going up!')
@@ -765,69 +769,68 @@ def go_command(obj):
 
 # north
 def north_command():
-    global cp
+    global current_position
     global du
     global rInt
-    if cp == 0 and du == 0:
+    if current_position == 0 and du == 0:
         print('the door is locked shut.')
         line700()
-    elif rInt[cp][0] == 0:
+    elif rInt[current_position][0] == 0:
         error_no_path()
-    elif cp == 0:
+    elif current_position == 0:
         print('the door slams shut behind you!')
-    cp = rInt[cp][0]
+    current_position = rInt[current_position][0]
     look_command()
 
 
 # south
 def south_command():
-    global cp
+    global current_position
     global fire_burning_flag
     print('17000 command')
-    if cp == 10 and fire_burning_flag:
+    if current_position == 10 and fire_burning_flag:
         print('you have burnt to a crisp!')
         exit()
 
-    if rInt[cp][1] == 0:
+    if rInt[current_position][1] == 0:
         error_no_path()
     else:
-        cp = rInt[cp][1]
+        current_position = rInt[current_position][1]
         line699()
 
 
 # east
 def east_command():
-    global cp
+    global current_position
     global ch
     global ps
-    global d
     global rInt
     print('17010 command')
-    if cp == 4 and ch == 0 and ps == 0:
+    if current_position == 4 and ch == 0 and ps == 0:
         print('the snake is about to attack!')
         ps = 1
         line700()
-    elif cp == 4 and ch == 0:
+    elif current_position == 4 and ch == 0:
         print('the snake bites you!')
         print('you are dead.')
         exit()
 
-    if rInt[cp][2] == 0:
+    if rInt[current_position][2] == 0:
         error_no_path()
     else:
-        cp = rInt[cp][2]
+        current_position = rInt[current_position][2]
         line699()
 
 
 # west
 def west_command():
-    global cp
+    global current_position
     global rInt
     print('19000 command')
-    if rInt[cp][3] == 0:
+    if rInt[current_position][3] == 0:
         error_no_path()
     else:
-        cp = rInt[cp][3]
+        current_position = rInt[current_position][3]
         line699()
 
 
@@ -853,14 +856,14 @@ def score_command():
 
 # turn
 def turn_command(obj):
-    global cp
+    global current_position
     global pool_flooded_flag
     global ol
     print('21000 command')
     if obj != 7:
         print("i don't know how to turn such a thing.")
         line699()
-    elif cp != 26:
+    elif current_position != 26:
         error_not_here()
     else:
         wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
@@ -879,16 +882,16 @@ def turn_command(obj):
 # jump
 def jump_command():
     global ol
-    global cp
+    global current_position
     global es
     global jm
     print('22000 command')
-    if cp != 27 and cp != 29 and cp != 32:
+    if current_position != 27 and current_position != 29 and current_position != 32:
         print("there's nowhere to jump.")
         line700()
     else:
         print('you jump..')
-        if cp == 27:
+        if current_position == 27:
             if jm == 1:
                 print("now you've done it.  you ignored")
                 print("my warning, and as a result")
@@ -900,15 +903,15 @@ def jump_command():
                 print('and narrowly escaped serious')
                 print("injury.  please don't try it again.")
                 jm = 1
-                cp = 2
+                current_position = 2
                 line699()
         if ol[14] == -1:
             print('there is no way to open the parachute!')
         elif ol[27] == -1:
             print('you yank the ripcord and the')
             print("'chute comes billowing out.")
-            if cp == 32:
-                cp = 40
+            if current_position == 32:
+                current_position = 40
                 line699()
             else:
                 print('you land safely')
@@ -923,12 +926,12 @@ def jump_command():
 
 # swim
 def swim_command():
-    global cp
+    global current_position
     global pool_flooded_flag
     print('24000 command')
-    if cp != 19 and cp != 25:
+    if current_position != 19 and current_position != 25:
         print("there's nothing here to swim in!")
-    elif cp == 19:
+    elif current_position == 19:
         print('the water is only a few inches deep.')
     elif pool_flooded_flag:
         print("in mercury?  no way!")
@@ -939,7 +942,7 @@ def swim_command():
 
 # fix
 def fix_command(obj):
-    global cp
+    global current_position
     global ol
     global pt
     print('25000 command')
@@ -949,7 +952,7 @@ def fix_command(obj):
         print("i ain't no plumber!")
     elif obj != 17:
         print("i wouldn't know how.")
-    elif fna(obj) != cp and fna(obj) != -1:
+    elif fna(obj) != current_position and fna(obj) != -1:
         error_not_here()
     elif ol[14] == -2:
         print("it's already fixed.")
