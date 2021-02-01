@@ -14,25 +14,24 @@ def delay():
 
 
 # variables
-program_name, cursor_issue = '', ''
+program_name, cursor_issue = 'miser', '27'
+help_strings, help_index = [], 0
+screen_width = 80
 ol = pt = []
-screen_width = 0
 rStr = []
 rInt = []
 om = []
-v = o = []
-em = pf = fb = vo = fv = du = kc = bf = gt = gg = es = ch = ps = jm = po = 0
-h = []
-in_str = ''
+verbs = o = []
+pool_flooded_flag = bucket_full_flag = fire_burning_flag = vault_open_flag = False
+fv = du = kc = gt = gg = es = ch = ps = jm = po = 0
 cp = 0
 
 
 def line0():
-    global program_name
-    program_name = 'miser'
-    global cursor_issue
-    cursor_issue = '27'
-    line62000()
+    welcome_banner()
+    initialize_data()
+    clear_screen()
+    line699()
 
 
 def fna(x):
@@ -41,24 +40,20 @@ def fna(x):
     return ol[pt[x]]
 
 
-def line20():
-    global screen_width
-    screen_width = 80
+def initialize_data():
     global rStr
     global rInt
     global om
     global ol
-    global v
+    global verbs
     global o
     global pt
-    global em
-    em = 1
-    global pf
-    pf = 1
-    global fb
-    fb = 1
-    global h
-    h = ['what?', "i don't understand that"]
+    global pool_flooded_flag
+    pool_flooded_flag = 1
+    global fire_burning_flag
+    fire_burning_flag = 1
+    global help_strings
+    help_strings = ['what?', "i don't understand that"]
     r_int_r_str_data = [
         ([1, 0, 0, 0], 'front porch'),
         ([2, 0, 0, 12], 'foyer to a large house.  dust is everywhere'),
@@ -118,10 +113,10 @@ def line20():
     rInt = l1
     rStr = l2
 
-    v = ['get', 'take', 'move', 'slid', 'push', 'open', 'read', 'inve', 'quit']
-    v += ['drop', 'say', 'pour', 'fill', 'unlo', 'look']
-    v += ['go', 'nort', 'n', 'sout', 's', 'east', 'e', 'west', 'w', 'scor', 'turn']
-    v += ['jump', 'swim', 'i', 'fix']
+    verbs = ['get', 'take', 'move', 'slid', 'push', 'open', 'read', 'inve', 'quit']
+    verbs += ['drop', 'say', 'pour', 'fill', 'unlo', 'look']
+    verbs += ['go', 'nort', 'n', 'sout', 's', 'east', 'e', 'west', 'w', 'scor', 'turn']
+    verbs += ['jump', 'swim', 'i', 'fix']
 
     o_pt_data = [
         ('ripc', 17), ('mat', 10), ('pape', 13), ('buck', 1), ('swor', 9),
@@ -148,7 +143,7 @@ def line20():
         ('brass door key', -2), ('majestic staircase leading up', 2),
         ('majestic staircase leading down', 27), ('battered book', 11), ('organ in the corner', 21),
         ('open organ in the corner', -2), ('cabinet on rollers against one wall over', 5),
-        ('repaired parachute', -2), ('sign saying ''drop coins for luck''', 19)
+        ('repaired parachute', -2), ("sign saying 'drop coins for luck'", 19)
     ]
     l1 = []
     l2 = []
@@ -159,135 +154,130 @@ def line20():
     om = l1
     ol = l2
 
-    clear_screen()
-    line699()
-
 
 def line699():
-    line14000()
+    look_command()
 
 
 def line700():
-    print('')
+    print()
     sc = sf = 0
-    line60000()
-    in_str.strip()
-    parse = in_str.split()
+    input_str = get_input()
+    input_str.strip()
+    parse = input_str.split()
     if len(parse) < 1 or len(parse) > 2:
         print('please type a one or two world command')
         line700()
-    cv = parse[0]
-    if len(cv) > 4:
-        cv = cv[0:4]
-    i = -1
-    for x in range(len(v)):
-        if cv == v[x]:
-            print(f'command {v[x]} {x}')
-            i = x
-    if i == -1:
-        line50000(cv)
+    command_verb = parse[0]
+    if len(command_verb) > 4:
+        command_verb = command_verb[0:4]
+    verb_index = -1
+    for x in range(len(verbs)):
+        if command_verb == verbs[x]:
+            print(f'command {verbs[x]} {x}')
+            verb_index = x
+    if verb_index == -1:
+        error_unknown_object(command_verb)
         line700()
 
     if len(parse) == 1:
-        j = 0
+        object_index = 0
     else:
-        co = parse[1]
-        if len(co) > 4:
-            co = co[0:4]
-        j = -1
+        command_object = parse[1]
+        if len(command_object) > 4:
+            command_object = command_object[0:4]
+        object_index = -1
         for x in range(len(o)):
-            if co == o[x]:
+            if command_object == o[x]:
                 print(f'object {o[x]} {x}')
-                j = x + 1
-        if j == -1:
-            line50000(co)
+                object_index = x + 1
+        if object_index == -1:
+            error_unknown_object(command_object)
             line700()
-    if i == 0 or i == 1:
-        line1000(j)
-    elif i == 2 or i == 3 or i == 4:
-        line2000(j)
-    elif i == 5:
-        line4000(j)
-    elif i == 6:
-        line5000(j)
-    elif i == 7:
-        line6000()
-    elif i == 8:
-        line7000()
-    elif i == 9:
-        line8000(j)
-    elif i == 10:
-        line9000(j, co)
-    elif i == 11:
-        line10000(j)
-    elif i == 12:
-        line11000(j)
-    elif i == 13:
-        line12000(j)
-    elif i == 14:
-        line14000()
-    elif i == 15:
-        line15000(j)
-    elif i == 16 or i == 17:
-        line16000()
-    elif i == 18 or i == 19:
-        line17000()
-    elif i == 20 or i == 21:
-        line17010()
-    elif i == 22 or i == 23:
-        line19000()
-    elif i == 24:
-        line20000()
-    elif i == 25:
-        line21000(j)
-    elif i == 26:
-        line22000()
-    elif i == 27:
-        line24000()
-    elif i == 28:
-        line6000()
-    elif i == 29:
-        line25000(j)
+    if verb_index == 0 or verb_index == 1:
+        get_take_command(object_index)
+    elif verb_index == 2 or verb_index == 3 or verb_index == 4:
+        move_slide_push_command(object_index)
+    elif verb_index == 5:
+        open_command(object_index)
+    elif verb_index == 6:
+        read_command(object_index)
+    elif verb_index == 7:
+        inventory_command()
+    elif verb_index == 8:
+        quit_command()
+    elif verb_index == 9:
+        drop_command(object_index)
+    elif verb_index == 10:
+        say_command(object_index, command_object)
+    elif verb_index == 11:
+        pour_command(object_index)
+    elif verb_index == 12:
+        fill_command(object_index)
+    elif verb_index == 13:
+        unlock_command(object_index)
+    elif verb_index == 14:
+        look_command()
+    elif verb_index == 15:
+        go_command(object_index)
+    elif verb_index == 16 or verb_index == 17:
+        north_command()
+    elif verb_index == 18 or verb_index == 19:
+        south_command()
+    elif verb_index == 20 or verb_index == 21:
+        east_command()
+    elif verb_index == 22 or verb_index == 23:
+        west_command()
+    elif verb_index == 24:
+        score_command()
+    elif verb_index == 25:
+        turn_command(object_index)
+    elif verb_index == 26:
+        jump_command()
+    elif verb_index == 27:
+        swim_command()
+    elif verb_index == 28:
+        inventory_command()
+    elif verb_index == 29:
+        fix_command(object_index)
 
     line700()
 
 
 # get, take object
-def line1000(obj):
+def get_take_command(obj):
     global pt
     global cp
     global ol
     global gt
     if obj == 0:
-        line50000('what?')
-    if pt[obj] == -1:
+        error_unknown_object('what?')
+    elif pt[obj] == -1:
         print('i am unable to do that.')
-        line700()
     elif fna(obj) == -1:
         print("you're already carrying it")
-        line700()
     elif fna(obj) != cp:
-        line51000()
+        error_not_here()
+    else:
+        # print('obj = ', obj)
+        # print('pt = ', pt)
+        # print('ol = ', ol)
+        ol[pt[obj - 1]] = -1
+        print('ok')
 
-    # print('obj = ', obj)
-    # print('pt = ', pt)
-    # print('ol = ', ol)
-    ol[pt[obj - 1]] = -1
-    print('ok')
-
-    # line 1030
-    if (3 < pt[obj] < 9) or pt[obj] == 19:
-        print('you got a treasure!')
-        gt += 1
-    # line 1040
-    if obj == 2 and ol[20] == -2:
-        print('you find a door key!')
-        ol[20] = 0
+        # line 1030
+        if (3 < pt[obj] < 9) or pt[obj] == 19:
+            print('you got a treasure!')
+            gt += 1
+        # line 1040
+        if obj == 2 and ol[20] == -2:
+            print('you find a door key!')
+            ol[20] = 0
     line700()
 
 
 # move, slide, push
-def line2000(obj):
+def move_slide_push_command(obj):
     global cp
     global rInt
     global pt
@@ -295,7 +285,7 @@ def line2000(obj):
     global fv
     print('2000 command')
     if obj == 0:
-        line50000('move what?')
+        error_unknown_object('move what?')
     elif obj == 13 and cp == 5 and rInt[5][3] == 0:
         print('behind the cabinet is a vault!')
         fv = 1
@@ -303,7 +293,7 @@ def line2000(obj):
     elif pt[obj] == -1:
         print('that item stays put.')
     elif fna(obj) != cp and fna(obj) != -1:
-        line51000()
+        error_not_here()
     elif obj == 2 and ol[20] == -2:
         # line 1040
         print('you find a door key!')
@@ -318,18 +308,16 @@ def line2000(obj):
 
 
 # open
-def line4000(obj):
-    global in_str
+def open_command(obj):
     print('4000 command')
     if obj == 0:
-        line50000('open what?')
+        error_unknown_object('open what?')
     elif obj != 11:
         line4030(obj)
     elif fna[obj] != cp and fna(obj) != -1:
         line4030(obj)
     else:
-        in_str = "scrawled in blood on the inside front cover is the message,"
-        line53000()
+        wrap_string("scrawled in blood on the inside front cover is the message,")
         print("''victory' is a prize-winning word'.")
     line700()
 
@@ -337,7 +325,6 @@ def line4000(obj):
 def line4030(obj):
     global cp
     global du
-    global in_str
     print('line4030')
     if obj == 7:
         print('try turning it.')
@@ -351,25 +338,22 @@ def line4030(obj):
         print("it's already open.")
         line700()
     elif cp != 6:
-        line51000()
+        error_not_here()
     else:
-        in_str = 'you open the door. you lean over to peer in, and you fall in!'
-        line53000()
+        wrap_string('you open the door. you lean over to peer in, and you fall in!')
         cp = 47
         line699()
 
 
 def line4120(obj):
     global cp
-    global in_str
     if obj != 13:
         line4160(obj)
     elif ol[26] != cp:
-        line51000()
+        error_not_here()
     else:
         print('the cabinet is empty and dusty.')
-        in_str = "scribbled in the dust on one shelf are the words, 'behind me'."
-        line53000()
+        wrap_string("scribbled in the dust on one shelf are the words, 'behind me'.")
     line700()
 
 
@@ -378,7 +362,7 @@ def line4160(obj):
     if obj != 22:
         line4190(obj)
     elif fna(obj) != cp and fna(obj) != -1:
-        line51000()
+        error_not_here()
     else:
         print('the bag is knotted securely.')
         print("it won't open.")
@@ -388,11 +372,12 @@ def line4160(obj):
 def line4190(obj):
     global cp
     global fv
+    global vault_open_flag
     if obj != 27:
         line4230(obj)
     elif cp != 5 or fv == 0:
-        line51000()
-    elif vo == 1:
+        error_not_here()
+    elif vault_open_flag:
         print("it's already open.")
     else:
         print("i can't, it's locked.")
@@ -405,7 +390,7 @@ def line4230(obj):
     if obj != 16:
         print("i don't know how to open that.")
     elif cp != 21:
-        line51000()
+        error_not_here()
     elif gg == 0:
         print("it's stuck shut.")
     elif ol[24] == -2:
@@ -421,14 +406,14 @@ def line4230(obj):
 
 
 # read
-def line5000(obj):
+def read_command(obj):
     print('5000 command')
     global cp
     global kc
     if obj == 0:
-        line50000('read what?')
+        error_unknown_object('read what?')
     if pt[obj] > -1 and fna(obj) != cp and fna(obj) != -1:
-        line51000()
+        error_not_here()
     elif pt[obj] == -1:
         print("there's nothing written on that.")
     elif obj != 3 and obj != 11:
@@ -443,42 +428,41 @@ def line5000(obj):
 
 
 # inventory
-def line6000():
+def inventory_command():
     global ol
     global om
-    global bf
+    global bucket_full_flag
     print('you are carrying the following:')
-    fi = 0
+    carrying_something = False
     # print('ol = ', ol)
     # print('om = ', om)
     for x in range(len(ol)):
         if ol[x] == -1:
             print(om[x - 1])
-            fi = 1
-        if x == 1 and bf == 1 and ol[1] == -1:
+            carrying_something = True
+        if x == 1 and bucket_full_flag and ol[1] == -1:
             print('  the bucket is full of water.')
         if x == 14 and ol[14] == -1:
             print('   (better fix it)')
-    if fi == 0:
+    if not carrying_something:
         print('nothing at all.')
     line700()
 
 
 # quit
-def line7000():
-    global in_str
+def quit_command():
     print('7000 command')
     print('do you indeed wish to quit now?')
-    line60000()
-    if in_str[0].lower() != 'y':
+    input_str = get_input()
+    if input_str[0].lower() != 'y':
         print('ok')
-        line700()
     else:
         clear_screen()
-        line7010()
+        final_stats()
+    line700()
 
 
-def line7010():
+def final_stats():
     global gt
     global es
     print('7010 command')
@@ -510,31 +494,28 @@ def line7010():
 
 
 # drop
-def line8000(obj):
+def drop_command(obj):
     global cp
     global ol
     global om
     global pt
-    global in_str
     global rInt
     global rStr
     global gg
     print('8000 command')
     if fna(obj) != -1:
-        print("ou aren't carrying it!")
+        print("you aren't carrying it!")
     else:
         x = pt[obj]
         if (3 < x < 9) or x == 19:
             print("don't drop *treasures*!")
         elif cp == 19 and obj == 19:
-            in_str = 'as the penny sinks below the surface of the pool, a fleeting image of'
-            line53000()
+            wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
             print('a chapel with dancers appears.')
             rInt[21][3] = 22
             ol[12] = -2
         elif cp == 22 and obj == 20:
-            in_str = 'even before it hits the ground, the cross fades away!'
-            line53000()
+            wrap_string('even before it hits the ground, the cross fades away!')
             print('the tablet has disintegrated.')
             print('you hear music from the organ.')
             gg = 1
@@ -548,10 +529,9 @@ def line8000(obj):
 
 
 # say
-def line9000(obj, word):
+def say_command(obj, word):
     global cp
     global ch
-    global in_str
     global ol
     global po
     global rInt
@@ -562,13 +542,11 @@ def line9000(obj, word):
         if cp != 4 or ch == 1:
             print('nothing happens.')
         else:
-            in_str = 'the snake is charmed by the very utterance of your words.'
-            line53000()
+            wrap_string('the snake is charmed by the very utterance of your words.')
             ch = 1
             ol[2] = -2
             ol[3] = 4
     elif obj == 15:
-        #line9200()
         if cp != 8 or po == 1:
             print('nothing happens.')
         else:
@@ -586,77 +564,77 @@ def line9000(obj, word):
 
 
 # pour
-def line10000(obj):
+def pour_command(obj):
     global ol
     global cp
-    global bf
-    global fb
+    global bucket_full_flag
+    global fire_burning_flag
     print('10000 command')
-    if j != 4:
+    if obj != 4:
         print("i wouldn't know how.")
     elif ol[1] != -1 and ol[1] != cp:
-        line51000()
-    elif bf == 0:
+        error_not_here()
+    elif not bucket_full_flag:
         print('the bucket is already empty')
     elif cp == 19:
         print('ok')
-    elif cp != 10 or fb == 0:
+    elif cp != 10 or not fire_burning_flag:
         print('the water disappears quickly.')
-        bf = 0
+        bucket_full_flag = 0
     else:
         print('congratulations! you have vanquished')
         print('the flames!')
-        fb = 0
-        bf = 0
+        fire_burning_flag = False
+        bucket_full_flag = False
         line699()
     line700()
 
 
 # fill
-def line11000(obj):
+def fill_command(obj):
     global pt
     global cp
-    global bf
-    global pf
+    global bucket_full_flag
+    global pool_flooded_flag
     print('11000 command')
     if obj == 0:
-        line50000()
+        error_unknown_object()
     elif pt[obj] == -1:
         print("that wouldn't hold anything.")
     elif fna(obj) != cp and fna(obj) != -1:
-        line51000()
+        error_not_here()
     elif obj != 4:
         print("that wouldn't hold anything.")
-    elif bf == 1:
+    elif bucket_full_flag:
         print("it's already full.")
-    elif cp == 25 and pf == 1:
+    elif cp == 25 and pool_flooded_flag:
         print("i'd rather stay away from the mercury.")
     elif cp != 23 and cp != 19:
         print("i don't see any water here.")
     else:
         print('your bucket is now full.')
-        bf = 1
+        bucket_full_flag = True
     line700()
 
 
 # unlock object
-def line12000(obj):
+def unlock_command(obj):
     global cp
     global ol
     print('12000 command')
     if obj == 0:
-        line50000('what?')
+        error_unknown_object('what?')
     elif obj != 12 and obj != 27:
         print("i wouldn't know how to unlock one.")
         line700()
     elif cp != 0 and cp != 5 and cp != 6:
-        line51000()
+        error_not_here()
     elif cp == 0 and obj == 12:
         line12200()
     elif cp == 5 and obj == 27:
         line12300()
     elif cp != 6 or obj != 12 or ol[16] != -2:
-        line51000()
+        error_not_here()
     else:
         print('the trapdoor has no lock')
     line700()
@@ -674,69 +652,69 @@ def line12200():
     else:
         print('the door easily unlocks and swings open.')
         du = 1
-        line14000()
+        look_command()
 
 
 def line12300():
-    global vo
+    global vault_open_flag
     global fv
     global kc
     global rInt
-    if vo == 1:
+    if vault_open_flag:
         print("it's already open.")
         line700()
     elif fv == 0:
-        line51000()
+        error_not_here()
     elif kc == 0:
         print('i don''t know the combination.')
         line700()
     else:
         print("ok, let's see.  12..35..6..")
         print('<click!> the door swings open.')
-        vo = 1
+        vault_open_flag = True
         rInt[5][2] = 46
-        line14000()
+        look_command()
 
 
 # look
-def line14000():
-    global in_str
+def look_command():
     global cp
-    in_str = f'you are in the {rStr[cp]}'
-    line53000()
-    line14010()
-
-
-def line14010():
+    global rStr
+    global rInt
+    global om
+    global ol
+    global pool_flooded_flag
+    global fire_burning_flag
+    global fv
+    global vault_open_flag
+    global du
+    wrap_string(f'you are in the {rStr[cp]}')
     for x in ol:
         if x == cp:
-            global in_str
-            in_str = f'there is a {om[x]} here'
-            line53000()
-        elif x == 1 and ol[1] == cp:
-            print("the pool is full of water")
+            wrap_string(f'there is a {om[x]} here')
+        if x == 1 and bucket_full_flag and ol[1] == cp:
+            print("the bucket is full of water")
     if cp == 25:
-        if pf == 1:
+        if pool_flooded_flag:
             print('the pool is full of liquid mercury')
-        elif fb != 0:
-            print('the pool''s empty')
+        else:
+            print("the pool's empty")
             if ol[7] == 48:
                 print('i see something shiny in the pool!')
-    if cp == 10 and fb == 1:
+    if cp == 10 and fire_burning_flag:
         print('there is a hot fire on the south wall!')
         print('if I go that way I''ll burn to death!')
     if cp == 16:
-        in_str = 'a rich, full voice says, ''ritnew is a charming world''.'
-        line53000()
+        wrap_string("a rich, full voice says, 'ritnew is a charming word'.")
     if cp == 26:
         print('there is a valve on one of the pipes.')
     if cp == 23:
         print('there is a leaky faucet nearby.')
-    if cp == 10 and fb == 0:
+    if cp == 10 and not fire_burning_flag:
         print('there is evidence of a recent fire here.')
     if cp == 5 and fv == 1:
         print('there is a vault in the east wall.')
-    if cp == 5 and vo == 1:
+    if cp == 5 and vault_open_flag:
         print('the vault is open')
     if cp == 0 and du == 1:
         print('an open door leads north.')
@@ -755,19 +733,18 @@ def line14010():
 
 
 # go
-def line15000(obj):
+def go_command(obj):
     global cp
     global ol
-    global in_str
     print('15000 command')
     if obj != 8 and obj != 18 and obj != 28:
-        line50000('what?')
+        error_unknown_object('what?')
     elif (obj == 8 and cp != 48) or (obj == 18 and cp != 2 and cp != 27) or (obj == 28 and cp != 25):
-        line51000()
+        error_not_here()
     elif obj == 8:
         cp = 25
         line699()
-    elif obj == 28 and pf == 1:
+    elif obj == 28 and pool_flooded_flag:
         print('the pool is full of mercury!')
         line700()
     elif obj == 28:
@@ -782,13 +759,12 @@ def line15000(obj):
         cp = 27
         line699()
     else:
-        in_str = 'the suits of armor prevent you from going up!'
-        line53000()
+        wrap_string('the suits of armor prevent you from going up!')
         line700()
 
 
 # north
-def line16000():
+def north_command():
     global cp
     global du
     global rInt
@@ -796,31 +772,31 @@ def line16000():
         print('the door is locked shut.')
         line700()
     elif rInt[cp][0] == 0:
-        line52000()
+        error_no_path()
     elif cp == 0:
         print('the door slams shut behind you!')
     cp = rInt[cp][0]
-    line14000()
+    look_command()
 
 
 # south
-def line17000():
+def south_command():
     global cp
-    global fb
+    global fire_burning_flag
     print('17000 command')
-    if cp == 10 and fb == 0:
+    if cp == 10 and fire_burning_flag:
         print('you have burnt to a crisp!')
         exit()
 
     if rInt[cp][1] == 0:
-        line52000()
+        error_no_path()
     else:
         cp = rInt[cp][1]
         line699()
 
 
 # east
-def line17010():
+def east_command():
     global cp
     global ch
     global ps
@@ -837,28 +813,27 @@ def line17010():
         exit()
 
     if rInt[cp][2] == 0:
-        line52000()
+        error_no_path()
     else:
         cp = rInt[cp][2]
         line699()
 
 
 # west
-def line19000():
+def west_command():
     global cp
     global rInt
     print('19000 command')
     if rInt[cp][3] == 0:
-        line52000()
+        error_no_path()
     else:
         cp = rInt[cp][3]
         line699()
 
 
 # score
-def line20000():
+def score_command():
     global gt
-    global in_str
     print('20000 command')
     print('if you were to quit now,')
     print('you would have a score of')
@@ -866,10 +841,10 @@ def line20000():
     print('(100 possible)')
     while True:
         print('do you indeed wish to quit now?')
-        line60000()
-        if in_str[0].lower() == 'y':
-            line7010()
-        elif in_str[0].lower() == 'n':
+        input_str = get_input()
+        if input_str[0].lower() == 'y':
+            final_stats()
+        elif input_str[0].lower() == 'n':
             print('ok')
             print()
             break
@@ -877,26 +852,24 @@ def line20000():
 
 
 # turn
-def line21000(obj):
+def turn_command(obj):
     global cp
-    global in_str
-    global pf
+    global pool_flooded_flag
     global ol
     print('21000 command')
     if obj != 7:
         print("i don't know how to turn such a thing.")
         line699()
     elif cp != 26:
-        line51000()
+        error_not_here()
     else:
-        in_str = 'with much effort, you turn the valve 5 times.  you hear the sound of liquid '
-        line53000()
+        wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
         print('flowing through the pipes.')
-        pf = 1 - pf
-        if pf == 0 and ol[7] == -3:
+        pool_flooded_flag = not pool_flooded_flag
+        if not pool_flooded_flag and ol[7] == -3:
             ol[7] = 25
             line700()
-        elif pf == 1 and ol[7] == 25:
+        elif pool_flooded_flag and ol[7] == 25:
             ol[7] = -3
             line700()
         else:
@@ -904,7 +877,8 @@ def line21000(obj):
 
 
 # jump
-def line22000():
+def jump_command():
+    global ol
     global cp
     global es
     global jm
@@ -938,9 +912,9 @@ def line22000():
                 line699()
             else:
                 print('you land safely')
-                print('congratulations on escapting!')
+                print('congratulations on escaping!')
                 es = 1
-                line7010()
+                final_stats()
         print('you hit the ground.')
         print("you have broken your neck!")
         print("you are dead.")
@@ -948,15 +922,15 @@ def line22000():
 
 
 # swim
-def line24000():
+def swim_command():
     global cp
-    global pf
+    global pool_flooded_flag
     print('24000 command')
     if cp != 19 and cp != 25:
         print("there's nothing here to swim in!")
     elif cp == 19:
         print('the water is only a few inches deep.')
-    elif pf == 1:
+    elif pool_flooded_flag:
         print("in mercury?  no way!")
     else:
         print('the pool is empty.')
@@ -964,19 +938,19 @@ def line24000():
 
 
 # fix
-def line25000(obj):
+def fix_command(obj):
     global cp
     global ol
     global pt
     print('25000 command')
     if obj == 0:
-        line50000('what')
+        error_unknown_object('what')
     elif obj == 7:
         print("i ain't no plumber!")
     elif obj != 17:
         print("i wouldn't know how.")
     elif fna(obj) != cp and fna(obj) != -1:
-        line51000()
+        error_not_here()
     elif ol[14] == -2:
         print("it's already fixed.")
     elif ol[17] != -1:
@@ -990,52 +964,47 @@ def line25000(obj):
     line700()
 
 
-def line50000(unknown_object):
-    global em
-    print(f'{unknown_object}?  {h[em]}')
-    em = 1 - em
+def error_unknown_object(unknown_object):
+    global help_index
+    print(f'{unknown_object}?  {help_strings[help_index]}')
+    help_index += 1
+    if help_index > len(help_strings):
+        help_index = 0
     line700()
 
 
-def line51000():
+def error_not_here():
     print("i don't see it here")
     line700()
 
 
-def line52000():
+def error_no_path():
     print("it's impossible to go that way.")
     line700()
 
 
-def line53000():
-    global in_str
+def wrap_string(long_string):
     global screen_width
-    if len(in_str) < screen_width:
-        print(in_str)
+    if len(long_string) < screen_width:
+        print(long_string)
     else:
-        last_space_index = in_str.rfind(' ', 0, screen_width)
-        print(in_str[:last_space_index])
-        print(in_str[last_space_index + 1:])
+        last_space_index = long_string.rfind(' ', 0, screen_width)
+        print(long_string[:last_space_index])
+        print(long_string[last_space_index + 1:])
 
 
-def line60000():
-    global in_str
-    in_str = input()
+def get_input():
+    return input()
 
 
-def line60500():
-    print('*' * 40)
-
-
-def line62000():
+def welcome_banner():
     print(f'{program_name:>12} by m.j. lansing')
     print(f'   cursor # {cursor_issue}  copyright (c) 1981')
-    line60500()
+    print('*' * 40)
     print("explore the miser's house   (needs 16k)")
     print('\n\n\npress return to begin')
     wait_for_keypress()
     print('\n\none moment please...')
-    line20()
 
 
 # Press the green button in the gutter to run the script.
