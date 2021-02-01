@@ -9,6 +9,10 @@ def wait_for_keypress():
     _ = input()
 
 
+def delay():
+    pass
+
+
 # variables
 program_name, cursor_issue = '', ''
 ol = pt = []
@@ -17,7 +21,7 @@ rStr = []
 rInt = []
 om = []
 v = o = []
-em = pf = fb = vo = fv = du = kc = bf = gt = gg = es = ch = ps = jm = 0
+em = pf = fb = vo = fv = du = kc = bf = gt = gg = es = ch = ps = jm = po = 0
 h = []
 in_str = ''
 cp = 0
@@ -211,9 +215,9 @@ def line700():
     elif i == 8:
         line7000()
     elif i == 9:
-        line8000()
+        line8000(j)
     elif i == 10:
-        line9000()
+        line9000(j, co)
     elif i == 11:
         line10000(j)
     elif i == 12:
@@ -223,7 +227,7 @@ def line700():
     elif i == 14:
         line14000()
     elif i == 15:
-        line15000()
+        line15000(j)
     elif i == 16 or i == 17:
         line16000()
     elif i == 18 or i == 19:
@@ -506,13 +510,79 @@ def line7010():
 
 
 # drop
-def line8000():
+def line8000(obj):
+    global cp
+    global ol
+    global om
+    global pt
+    global in_str
+    global rInt
+    global rStr
+    global gg
     print('8000 command')
+    if fna(obj) != -1:
+        print("ou aren't carrying it!")
+    else:
+        x = pt[obj]
+        if (3 < x < 9) or x == 19:
+            print("don't drop *treasures*!")
+        elif cp == 19 and obj == 19:
+            in_str = 'as the penny sinks below the surface of the pool, a fleeting image of'
+            line53000()
+            print('a chapel with dancers appears.')
+            rInt[21][3] = 22
+            ol[12] = -2
+        elif cp == 22 and obj == 20:
+            in_str = 'even before it hits the ground, the cross fades away!'
+            line53000()
+            print('the tablet has disintegrated.')
+            print('you hear music from the organ.')
+            gg = 1
+            ol[11] = -2
+            rStr[22] = 'chapel'
+            om[24] = 'closed organ playing music in the corner'
+        else:
+            ol[pt[obj]] = cp
+            print('ok')
+    line700()
 
 
 # say
-def line9000():
+def line9000(obj, word):
+    global cp
+    global ch
+    global in_str
+    global ol
+    global po
+    global rInt
     print('9000 command')
+    if obj == 0:
+        print('say what???')
+    elif obj == 14:
+        if cp != 4 or ch == 1:
+            print('nothing happens.')
+        else:
+            in_str = 'the snake is charmed by the very utterance of your words.'
+            line53000()
+            ch = 1
+            ol[2] = -2
+            ol[3] = 4
+    elif obj == 15:
+        #line9200()
+        if cp != 8 or po == 1:
+            print('nothing happens.')
+        else:
+            print('a portal has opened in the north wall!!')
+            po = 1
+            rInt[8][0] = 17
+            ol[18] = 8
+    elif obj > 28:
+        print("a hollow voice says, 'wrong adventure'.")
+    else:
+        print('okay, "', word, '".')
+        delay()
+        print('nothing happens.')
+    line700()
 
 
 # pour
@@ -596,7 +666,7 @@ def line12200():
     global du
     global ol
     if du == 1:
-        print('it''s already unlocked.')
+        print("it's already unlocked.")
         line700()
     elif ol[20] != -1:
         print('i need a key.')
@@ -613,7 +683,7 @@ def line12300():
     global kc
     global rInt
     if vo == 1:
-        print('it''s already open.')
+        print("it's already open.")
         line700()
     elif fv == 0:
         line51000()
@@ -621,7 +691,7 @@ def line12300():
         print('i don''t know the combination.')
         line700()
     else:
-        print('ok, let''s see.  12..35..6..')
+        print("ok, let's see.  12..35..6..")
         print('<click!> the door swings open.')
         vo = 1
         rInt[5][2] = 46
@@ -685,8 +755,36 @@ def line14010():
 
 
 # go
-def line15000():
+def line15000(obj):
+    global cp
+    global ol
+    global in_str
     print('15000 command')
+    if obj != 8 and obj != 18 and obj != 28:
+        line50000('what?')
+    elif (obj == 8 and cp != 48) or (obj == 18 and cp != 2 and cp != 27) or (obj == 28 and cp != 25):
+        line51000()
+    elif obj == 8:
+        cp = 25
+        line699()
+    elif obj == 28 and pf == 1:
+        print('the pool is full of mercury!')
+        line700()
+    elif obj == 28:
+        cp = 48
+        line700()
+    elif cp == 27:
+        cp = 2
+        line699()
+    elif ol[9] == -1:
+        print('the suits of armor try to stop you,')
+        print('but you fight them off with your sword.')
+        cp = 27
+        line699()
+    else:
+        in_str = 'the suits of armor prevent you from going up!'
+        line53000()
+        line700()
 
 
 # north

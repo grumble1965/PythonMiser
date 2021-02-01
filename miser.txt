@@ -183,33 +183,33 @@
 - 7115 print"<grandmaster adventurer>"
 - 7120 ifgt<>6thenprint"{down}better luck next time!"
 - 7150 end
- 8000 iffna(j)<>-1thenprint"you aren't carrying it!":goto700
- 8010 x=pt%(j):if(x>3andx<9)orx=19thenprint"don't drop *treasures*!":goto700
- 8020 ifcp=19andj=19then8100
- 8030 ifcp=22andj=20then8200
- 8040 ol%(pt%(j))=cp:print"ok":goto700
- 8100 in$="as the penny sinks below the surface of the pool, a fleeting image of"
- 8110 gosub53000:print:print"a chapel with dancers outside appears."
- 8130 r%(21,3)=22:ol%(12)=-2:goto700
- 8200 in$="even before it hits the ground, the cross fades away!":gosub53000:print
- 8210 print"{down}the tablet has disintegrated."
- 8215 print"{down}you hear music from the organ."
- 8220 gg=1:ol%(11)=-2:r$(22)="chapel"
- 8221 om$(24)="closed organ playing music in the corner":goto700
- 9000 ifj=0thenprint"say what???":goto700
- 9010 ifj=14then9100
- 9020 ifj=15then9200
- 9030 ifj>28then9300
- 9040 print"okay, '";right$(in$,len(in$)-sp);"'."
- 9050 forx=1to1000:nextx:print"nothing happens.":goto700
- 9100 ifcp<>4orchthenprint"nothing happens.":goto700
- 9110 in$="the snake is charmed by the very utterance of your words."
- 9111 gosub53000:print
- 9120 ch=1:ol%(2)=-2:ol%(3)=4:goto700
- 9200 ifcp<>8orpothenprint"nothing happens.":goto700
- 9210 print"a portal has opened in the north wall!!"
- 9220 po=1:r%(8,1)=17:ol%(18)=8:goto700
- 9300 print"a hollow voice says, 'wrong adventure'.":goto700
+- 8000 iffna(j)<>-1thenprint"you aren't carrying it!":goto700
+- 8010 x=pt%(j):if(x>3andx<9)orx=19thenprint"don't drop *treasures*!":goto700
+- 8020 ifcp=19andj=19then8100
+- 8030 ifcp=22andj=20then8200
+- 8040 ol%(pt%(j))=cp:print"ok":goto700
+- 8100 in$="as the penny sinks below the surface of the pool, a fleeting image of"
+- 8110 gosub53000:print:print"a chapel with dancers outside appears."
+- 8130 r%(21,3)=22:ol%(12)=-2:goto700
+- 8200 in$="even before it hits the ground, the cross fades away!":gosub53000:print
+- 8210 print"{down}the tablet has disintegrated."
+- 8215 print"{down}you hear music from the organ."
+- 8220 gg=1:ol%(11)=-2:r$(22)="chapel"
+- 8221 om$(24)="closed organ playing music in the corner":goto700
+- 9000 ifj=0thenprint"say what???":goto700
+- 9010 ifj=14then9100
+- 9020 ifj=15then9200
+- 9030 ifj>28then9300
+- 9040 print"okay, '";right$(in$,len(in$)-sp);"'."
+- 9050 forx=1to1000:nextx:print"nothing happens.":goto700
+- 9100 ifcp<>4orchthenprint"nothing happens.":goto700
+- 9110 in$="the snake is charmed by the very utterance of your words."
+- 9111 gosub53000:print
+- 9120 ch=1:ol%(2)=-2:ol%(3)=4:goto700
+- 9200 ifcp<>8orpothenprint"nothing happens.":goto700
+- 9210 print"a portal has opened in the north wall!!"
+- 9220 po=1:r%(8,1)=17:ol%(18)=8:goto700
+- 9300 print"a hollow voice says, 'wrong adventure'.":goto700
 - 10000 ifj<>4thenprint"i wouldn't know how.":goto700
 - 10010 ifol%(1)<>-1andol%(1)<>cpthen51000
 - 10020 ifbf=0thenprint"the bucket is already empty.":goto700
@@ -266,17 +266,17 @@
 - 14150 ifr%(cp,3)>0thenprint"e ";
 - 14160 ifr%(cp,4)>0thenprint"w ";
 - 14170 print:goto700
- 15000 ifj<>8andj<>18andj<>28then50000
- 15010 if(j=8andcp<>48)or(j=18andcp<>2andcp<>27)or(j=28andcp<>25)then51000
- 15020 ifj=8thencp=25:goto699
- 15030 ifj=28andpfthenprint"the pool is full of mercury!":goto700
- 15040 ifj=28thencp=48:goto699
- 15050 ifcp=27thencp=2:goto699
- 15060 ifol%(9)=-1then15070
- 15061 in$="the suits of armor prevent you from going up!":gosub53000
- 15062 print:goto700
- 15070 print"the suits of armor try to stop you,"
- 15080 print"but you fight them off with your sword.":cp=27:goto699
+- 15000 ifj<>8andj<>18andj<>28then50000
+- 15010 if(j=8andcp<>48)or(j=18andcp<>2andcp<>27)or(j=28andcp<>25)then51000
+- 15020 ifj=8thencp=25:goto699
+- 15030 ifj=28andpfthenprint"the pool is full of mercury!":goto700
+- 15040 ifj=28thencp=48:goto699
+- 15050 ifcp=27thencp=2:goto699
+- 15060 ifol%(9)=-1then15070
+- 15061 in$="the suits of armor prevent you from going up!":gosub53000
+- 15062 print:goto700
+- 15070 print"the suits of armor try to stop you,"
+- 15080 print"but you fight them off with your sword.":cp=27:goto699
 - 16000 ifcp=0anddu=0thenprint"the door is locked shut.":goto700
 - 16010 ifr%(cp,1)=0then52000
 - 16015 ifcp=0thenprint"{down}the door slams shut behind you!"
