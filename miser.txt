@@ -106,21 +106,21 @@
 - 1005 iffna(j)=-1thenprint"you're already carrying it":goto700
 - 1010 iffna(j)<>cpthen51000
 - 1020 ol%(pt%(j))=-1:print"ok"
- 1030 x=pt%(j):if(x>3andx<9)orx=19thenprint"you got a treasure!":gt=gt+1
- 1040 ifj=2andol%(20)=-2thenprint"you find a door key!":ol%(20)=0
- 1050 goto700
- 2000 ifj=0then50000
- 2005 ifj=13andcp=5andr%(5,3)=0then2100
- 2010 ifpt%(j)=-1thenprint"that item stays put.":goto700
- 2020 if(fna(j)<>cp)and(fna(j)<>-1)then51000
- 2030 ifj=2andol%(20)=-2then1040
- 2040 ifj=10andol%(16)=-2then2200
- 2050 print"moving it reveals nothing."
- 2060 goto700
- 2100 print"behind the cabinet is a vault!"
- 2110 fv=1:goto699
- 2200 print"you find a trap door!"
- 2210 ol%(16)=6:goto699
+- 1030 x=pt%(j):if(x>3andx<9)orx=19thenprint"you got a treasure!":gt=gt+1
+- 1040 ifj=2andol%(20)=-2thenprint"you find a door key!":ol%(20)=0
+- 1050 goto700
+- 2000 ifj=0then50000
+- 2005 ifj=13andcp=5andr%(5,3)=0then2100
+- 2010 ifpt%(j)=-1thenprint"that item stays put.":goto700
+- 2020 if(fna(j)<>cp)and(fna(j)<>-1)then51000
+- 2030 ifj=2andol%(20)=-2then1040
+- 2040 ifj=10andol%(16)=-2then2200
+- 2050 print"moving it reveals nothing."
+- 2060 goto700
+- 2100 print"behind the cabinet is a vault!"
+- 2110 fv=1:goto699
+- 2200 print"you find a trap door!"
+- 2210 ol%(16)=6:goto699
 - 4000 ifj=0then50000
 - 4002 ifj<>11then4030
 - 4005 if(fna(j)<>cp)and(fna(j)<>-1)then4030
@@ -210,21 +210,21 @@
  9210 print"a portal has opened in the north wall!!"
  9220 po=1:r%(8,1)=17:ol%(18)=8:goto700
  9300 print"a hollow voice says, 'wrong adventure'.":goto700
- 10000 ifj<>4thenprint"i wouldn't know how.":goto700
- 10010 ifol%(1)<>-1andol%(1)<>cpthen51000
- 10020 ifbf=0thenprint"the bucket is already empty.":goto700
- 10030 ifcp=19thenprint"ok":goto700
- 10040 ifcp<>10orfb=0thenprint"the water disappears quickly.":bf=0:goto700
- 10050 print"congratulations! you have vanquished":print"the flames."
- 10060 fb=0:bf=0:goto699
- 11000 ifj=0then50000
- 11010 ifpt%(j)=-1thenprint"that wouldn't hold anything.":goto700
- 11020 iffna(j)<>cpandfna(j)<>-1then51000
- 11030 ifj<>4thenprint"that wouldn't hold anything.":goto700
- 11040 ifbfthenprint"it's already full.":goto700
- 11050 ifcp=25andpfthenprint"i'd rather stay away from the mercury.":goto700
- 11060 ifcp<>23andcp<>19thenprint"i don't see any water here.":goto700
- 11070 print"your bucket is now full.":bf=1:goto700
+- 10000 ifj<>4thenprint"i wouldn't know how.":goto700
+- 10010 ifol%(1)<>-1andol%(1)<>cpthen51000
+- 10020 ifbf=0thenprint"the bucket is already empty.":goto700
+- 10030 ifcp=19thenprint"ok":goto700
+- 10040 ifcp<>10orfb=0thenprint"the water disappears quickly.":bf=0:goto700
+- 10050 print"congratulations! you have vanquished":print"the flames."
+- 10060 fb=0:bf=0:goto699
+- 11000 ifj=0then50000
+- 11010 ifpt%(j)=-1thenprint"that wouldn't hold anything.":goto700
+- 11020 iffna(j)<>cpandfna(j)<>-1then51000
+- 11030 ifj<>4thenprint"that wouldn't hold anything.":goto700
+- 11040 ifbfthenprint"it's already full.":goto700
+- 11050 ifcp=25andpfthenprint"i'd rather stay away from the mercury.":goto700
+- 11060 ifcp<>23andcp<>19thenprint"i don't see any water here.":goto700
+- 11070 print"your bucket is now full.":bf=1:goto700
 - 12000 ifj=0then50000
 - 12010 ifj<>12andj<>27thenprint"i wouldn't know how to unlock one.":goto700
 - 12020 ifcp<>0andcp<>5andcp<>6then51000
@@ -281,14 +281,14 @@
 - 16010 ifr%(cp,1)=0then52000
 - 16015 ifcp=0thenprint"{down}the door slams shut behind you!"
 - 16020 cp=r%(cp,1):goto699
- 17000 ifcp=10andfbthenprint"you have burnt to a crisp!":end
- 17010 ifcp=4andch=0andps=0thenprint"the snake is about to attack!":ps=1:goto700
- 17020 ifcp=4andch=0thenprint"the snake bites you!":print"you are dead.":end
- 17030 d=2:ifi=21ori=22thend=3
- 17040 ifr%(cp,d)=0then52000
- 17050 cp=r%(cp,d):goto699
- 19000 ifr%(cp,4)=0then52000
- 19010 cp=r%(cp,4):goto699
+- 17000 ifcp=10andfbthenprint"you have burnt to a crisp!":end
+- 17010 ifcp=4andch=0andps=0thenprint"the snake is about to attack!":ps=1:goto700
+- 17020 ifcp=4andch=0thenprint"the snake bites you!":print"you are dead.":end
+- 17030 d=2:ifi=21ori=22thend=3
+- 17040 ifr%(cp,d)=0then52000
+- 17050 cp=r%(cp,d):goto699
+- 19000 ifr%(cp,4)=0then52000
+- 19010 cp=r%(cp,4):goto699
 - 20000 print:print"if you were to quit now,":print"you would have a score of";
 - 20010 printgt*20;"points.":print"(100 possible){down}"
 - 20020 print"do you indeed wish to quit now? ";
@@ -296,40 +296,40 @@
 - 20040 print:ifleft$(in$,1)="y" then 7010
 - 20050 ifleft$(in$,1)<>"n"thenprint"please answer yes or no":goto20020
 - 20060 print"ok":print:goto700
- 21000 ifj<>7thenprint"i don't know how to turn such a thing.":goto700
- 21010 ifcp<>26then51000
- 21020 in$="with much effort, you turn the valve 5 times. you hear the sound "
- 21030 in$=in$+"of liquid ":gosub53000:print:print"flowing through pipes."
- 21040 pf=1-pf
- 21050 ifpf=0andol%(7)=-3thenol%(7)=25:goto700
- 21060 ifpfandol%(7)=25thenol%(7)=-3:goto700
- 21070 goto700
- 22000 ifcp<>27andcp<>29andcp<>32thenprint"there's nowhere to jump.":goto700
- 22010 print"you jump..":ifcp=27then22500
- 22020 ifol%(14)=-1then22100
- 22030 ifol%(27)=-1then22200
- 22040 print"you hit the ground.":goto22540
- 22100 print"there is no way to open the parachute!":goto22040
- 22200 print"you yank the ripcord and the"
- 22210 print"'chute comes billowing out.":ifcp=32thencp=40:goto699
- 22220 print"you land safely":print"{down}congratulations on escaping!":es=1:goto7010
- 22500 ifjmthen22530
- 22510 print"you have landed down-stairs,":print"and narrowly escaped serious"
- 22520 print"injury. please don't try it again.":jm=1:cp=2:goto699
- 22530 print"now you've done it. you ignored":print"my warning, and as a result"
- 22540 print"you have broken your neck!":print"{down}you are dead.":end
- 24000 ifcp<>19andcp<>25thenprint"there's nothing here to swim in!":goto700
- 24010 ifcp=19then print"the water is only a few inches deep.":goto700
- 24020 ifpfthenprint"in mercury? no way!":goto700
- 24030 print"the pool is empty.":goto700
- 25000 ifj=0then50000
- 25010 ifj=7thenprint"i ain't no plumber.":goto700
- 25020 ifj<>17thenprint"i wouldn't know how.":goto700
- 25030 iffna(j)<>cpandfna(j)<>-1then51000
- 25040 ifol%(14)=-2thenprint"it's already fixed.":goto700
- 25050 ifol%(17)<>-1thenprint"i need a ripcord.":goto700
- 25060 print"i'm no expert, but i think it'll work."
- 25070 ol%(27)=ol%(14):ol%(14)=-2:pt%(17)=27:ol%(17)=0:goto700
+- 21000 ifj<>7thenprint"i don't know how to turn such a thing.":goto700
+- 21010 ifcp<>26then51000
+- 21020 in$="with much effort, you turn the valve 5 times. you hear the sound "
+- 21030 in$=in$+"of liquid ":gosub53000:print:print"flowing through pipes."
+- 21040 pf=1-pf
+- 21050 ifpf=0andol%(7)=-3thenol%(7)=25:goto700
+- 21060 ifpfandol%(7)=25thenol%(7)=-3:goto700
+- 21070 goto700
+- 22000 ifcp<>27andcp<>29andcp<>32thenprint"there's nowhere to jump.":goto700
+- 22010 print"you jump..":ifcp=27then22500
+- 22020 ifol%(14)=-1then22100
+- 22030 ifol%(27)=-1then22200
+- 22040 print"you hit the ground.":goto22540
+- 22100 print"there is no way to open the parachute!":goto22040
+- 22200 print"you yank the ripcord and the"
+- 22210 print"'chute comes billowing out.":ifcp=32thencp=40:goto699
+- 22220 print"you land safely":print"{down}congratulations on escaping!":es=1:goto7010
+- 22500 ifjmthen22530
+- 22510 print"you have landed down-stairs,":print"and narrowly escaped serious"
+- 22520 print"injury. please don't try it again.":jm=1:cp=2:goto699
+- 22530 print"now you've done it. you ignored":print"my warning, and as a result"
+- 22540 print"you have broken your neck!":print"{down}you are dead.":end
+- 24000 ifcp<>19andcp<>25thenprint"there's nothing here to swim in!":goto700
+- 24010 ifcp=19then print"the water is only a few inches deep.":goto700
+- 24020 ifpfthenprint"in mercury? no way!":goto700
+- 24030 print"the pool is empty.":goto700
+- 25000 ifj=0then50000
+- 25010 ifj=7thenprint"i ain't no plumber.":goto700
+- 25020 ifj<>17thenprint"i wouldn't know how.":goto700
+- 25030 iffna(j)<>cpandfna(j)<>-1then51000
+- 25040 ifol%(14)=-2thenprint"it's already fixed.":goto700
+- 25050 ifol%(17)<>-1thenprint"i need a ripcord.":goto700
+- 25060 print"i'm no expert, but i think it'll work."
+- 25070 ol%(27)=ol%(14):ol%(14)=-2:pt%(17)=27:ol%(17)=0:goto700
 - 50000 printh$(em):em=3-em:goto700
 - 51000 print"i don't see it here.":goto700
 - 52000 print"it's impossible to go that way.":goto700
