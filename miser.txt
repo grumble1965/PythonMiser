@@ -66,10 +66,10 @@
 -  511 datadrop,say,pour,fill,unlo,look
 -  512 datago,nort,n,sout,s,east,e,west,w,scor,turn,jump,swim,i,fix
 -  550 fori=1to30:reado$(i),pt%(i):nexti
--  560 dataripc,17,mat,10,pape,13,buck,1,swor,9,key,20,valv,-1,ladd,-1
--  570 dataslip,19,rug,15,book,23,door,-1,cabi,-1,ritn,-1,vict,-1,orga,-1,para,14
--  580 datastai,-1,penn,12,cros,11,leaf,4,bag,5,>$<,-1,>$<,-1,ring,7,pain,8
--  590 datavaul,-1,pool,-1,xyzz,-1,plug,-1
+-  560 data ripc,17,mat,10,pape,13,buck,1,swor,9,key,20,valv,-1,ladd,-1
+-  570 data slip,19,rug,15,book,23,door,-1,cabi,-1,ritn,-1,vict,-1,orga,-1,para,14
+-  580 data stai,-1,penn,12,cros,11,leaf,4,bag,5,>$<,-1,>$<,-1,ring,7,pain,8
+-  590 data vaul,-1,pool,-1,xyzz,-1,plug,-1
 -  600 fori=1to28:readom$(i),ol%(i):nexti:print"{clr}"
 -  610 dataplastic bucket,26,vicious snake,4,charmed snake,-2,*golden leaf*,45
 -  611 data*bulging moneybag*,46,>$<,-2,*diamond ring*,48
