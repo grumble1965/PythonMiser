@@ -12,6 +12,12 @@ class RoomClass:
         self.moves = directions
 
 
+class ObjectClass:
+    def __init__(self, text, location):
+        self.text = text
+        self.location = location
+
+
 # useful functions
 def clear_screen():
     read_line.console.home()
@@ -32,9 +38,9 @@ def delay():
 program_name, cursor_issue = 'miser', '27'
 help_strings, help_index = [], 0
 text_wrap_width = 80
-ol = pt = []
+objects = []
 rooms = []
-om = []
+pt = []
 verbs = o = []
 pool_flooded_flag = bucket_full_flag = fire_burning_flag = vault_open_flag = False
 found_vault_flag = dungeon_unlocked_flag = know_combination_flag = False
@@ -44,34 +50,33 @@ gathered_treasures = 0
 current_position = 0
 
 
-def line0():
+def main():
     welcome_banner()
     initialize_data()
     clear_screen()
-    line699()
-    line700()
+    describe_current_position()
+    main_command_loop()
 
 
-def fna(x):
-    global ol
-    global pt
-    return ol[pt[x]]
+def get_object_location(x):
+    global objects, pt
+    return objects[pt[x]].location
 
 
 def initialize_data():
     # TODO: make parallel arrays into structs or objects
+    # todo get rid of magic numbers
     global rooms
-    global om
-    global ol
+    global objects
     global verbs
-    global o
-    global pt
-    global pool_flooded_flag
-    pool_flooded_flag = True
-    global fire_burning_flag
-    fire_burning_flag = True
+    global o, pt
+
+    global pool_flooded_flag, fire_burning_flag
+    pool_flooded_flag = fire_burning_flag = True
+
     global help_strings
     help_strings = ['what?', "i don't understand that"]
+
     room_data = [
         ([1, 0, 0, 0], 'front porch'),
         ([2, 0, 0, 12], 'foyer to a large house.  dust is everywhere'),
@@ -150,7 +155,7 @@ def initialize_data():
     o = l1
     pt = l2
 
-    om_ol_data = [
+    object_data = [
         ('--unused--', -999),
         ('plastic bucket', 26), ('vicious snake', 4), ('charmed snake', -2), ('*golden leaf*', 45),
         ('*bulging moneybag*', 46), ('>$<', -2), ('*diamond ring*', 48), ('*rare painting*', 39),
@@ -162,31 +167,24 @@ def initialize_data():
         ('open organ in the corner', -2), ('cabinet on rollers against one wall over', 5),
         ('repaired parachute', -2), ("sign saying 'drop coins for luck'", 19)
     ]
-    l1 = []
-    l2 = []
-    for (xx, yy) in om_ol_data:
+    temp_list = []
+    for (xx, yy) in object_data:
         # print('xx = ', xx, 'yy = ', yy)
-        l1.append(xx)
-        l2.append(yy)
-    om = l1
-    ol = l2
+        temp_list.append(ObjectClass(xx, yy))
+    objects = temp_list
 
 
-def line699():
-    look_command()
-
-
-# todo: fix disgusting control flow
-def line700():
+def main_command_loop():
     while True:
         print()
         input_str = get_input()
         input_str.strip()
-        parse = input_str.split()
-        if len(parse) < 1 or len(parse) > 2:
+        parsed_words = input_str.split()
+        if len(parsed_words) < 1 or len(parsed_words) > 2:
             print('please type a one or two world command')
-            line700()
-        command_verb = parse[0]
+            continue
+
+        command_verb = parsed_words[0]
         command_object = 'unassigned'
         if len(command_verb) > 4:
             command_verb = command_verb[0:4]
@@ -199,10 +197,10 @@ def line700():
             error_unknown_object(command_verb)
             continue
 
-        if len(parse) == 1:
+        if len(parsed_words) == 1:
             object_index = 0
         else:
-            command_object = parse[1]
+            command_object = parsed_words[1]
             if len(command_object) > 4:
                 command_object = command_object[0:4]
             object_index = -1
@@ -213,6 +211,7 @@ def line700():
                 error_unknown_object(command_object)
                 continue
 
+        # todo replace this with something better
         if verb_index == 1 or verb_index == 2:
             get_take_command(object_index)
         elif verb_index == 3 or verb_index == 4 or verb_index == 5:
@@ -236,7 +235,7 @@ def line700():
         elif verb_index == 14:
             unlock_command(object_index)
         elif verb_index == 15:
-            look_command()
+            describe_current_position()
         elif verb_index == 16:
             go_command(object_index)
         elif verb_index == 17 or verb_index == 18:
@@ -263,20 +262,17 @@ def line700():
 
 # get, take object
 def get_take_command(obj):
-    global pt
-    global current_position
-    global ol
-    global gathered_treasures
+    global current_position, pt, objects, gathered_treasures
     if obj == 0:
         error_unknown_object('what?')
     elif pt[obj] == -1:
         print('i am unable to do that.')
-    elif fna(obj) == -1:
+    elif get_object_location(obj) == -1:
         print("you're already carrying it")
-    elif fna(obj) != current_position:
+    elif get_object_location(obj) != current_position:
         error_not_here()
     else:
-        ol[pt[obj]] = -1
+        objects[pt[obj]].location = -1
         print('ok')
 
         # line 1030
@@ -284,49 +280,46 @@ def get_take_command(obj):
             print('you got a treasure!')
             gathered_treasures += 1
         # line 1040
-        if obj == 2 and ol[20] == -2:
+        if obj == 2 and objects[20].location == -2:
             print('you find a door key!')
-            ol[20] = 0
+            objects[20].location = 0
 
 
 # move, slide, push
 def move_slide_push_command(obj):
-    global current_position
-    global rooms
-    global pt
-    global ol
-    global found_vault_flag
+    global current_position, rooms, pt, objects, found_vault_flag
     print('2000 command')
     if obj == 0:
         error_unknown_object('move what?')
     elif obj == 13 and current_position == 5 and rooms[5].moves[3] == 0:
         print('behind the cabinet is a vault!')
         found_vault_flag = True
-        line699()
+        describe_current_position()
     elif pt[obj] == -1:
         print('that item stays put.')
-    elif fna(obj) != current_position and fna(obj) != -1:
+    elif get_object_location(obj) != current_position and get_object_location(obj) != -1:
         error_not_here()
-    elif obj == 2 and ol[20] == -2:
+    elif obj == 2 and objects[20].location == -2:
         # line 1040
         print('you find a door key!')
-        ol[20] = 0
-    elif obj == 10 and ol[16] == -2:
+        objects[20].location = 0
+    elif obj == 10 and objects[16].location == -2:
         print('you find a trap door!')
-        ol[16] = 6
-        line699()
+        objects[16].location = 6
+        describe_current_position()
     else:
         print('moving it reveals nothing.')
 
 
 # open
+# todo  fix this control flow
 def open_command(obj):
     print('4000 command')
     if obj == 0:
         error_unknown_object('open what?')
     elif obj != 11:
         line4030(obj)
-    elif fna(obj) != current_position and fna(obj) != -1:
+    elif get_object_location(obj) != current_position and get_object_location(obj) != -1:
         line4030(obj)
     else:
         wrap_string("scrawled in blood on the inside front cover is the message,")
@@ -334,8 +327,7 @@ def open_command(obj):
 
 
 def line4030(obj):
-    global current_position
-    global dungeon_unlocked_flag
+    global current_position, dungeon_unlocked_flag
     print('line4030')
     if obj == 7:
         print('try turning it.')
@@ -350,14 +342,14 @@ def line4030(obj):
     else:
         wrap_string('you open the door. you lean over to peer in, and you fall in!')
         current_position = 47
-        line699()
+        describe_current_position()
 
 
 def line4120(obj):
-    global current_position
+    global current_position, objects
     if obj != 13:
         line4160(obj)
-    elif ol[26] != current_position:
+    elif objects[26].location != current_position:
         error_not_here()
     else:
         print('the cabinet is empty and dusty.')
@@ -368,7 +360,7 @@ def line4160(obj):
     global current_position
     if obj != 22:
         line4190(obj)
-    elif fna(obj) != current_position and fna(obj) != -1:
+    elif get_object_location(obj) != current_position and get_object_location(obj) != -1:
         error_not_here()
     else:
         print('the bag is knotted securely.')
@@ -376,9 +368,7 @@ def line4160(obj):
 
 
 def line4190(obj):
-    global current_position
-    global found_vault_flag
-    global vault_open_flag
+    global current_position, found_vault_flag, vault_open_flag
     if obj != 27:
         line4230(obj)
     elif current_position != 5 or not found_vault_flag:
@@ -390,33 +380,31 @@ def line4190(obj):
 
 
 def line4230(obj):
-    global gg_flag
-    global ol
+    global gg_flag, objects
     if obj != 16:
         print("i don't know how to open that.")
     elif current_position != 21:
         error_not_here()
     elif not gg_flag:
         print("it's stuck shut.")
-    elif ol[24] == -2:
+    elif objects[24].location == -2:
         print("it's already open.")
     else:
         print('as you open it, several objects suddenly appear!')
-        ol[24] = -2
-        ol[25] = 21
-        ol[19] = 21
-        ol[17] = 21
-        line699()
+        objects[24].location = -2
+        objects[25].location = 21
+        objects[19].location = 21
+        objects[17].location = 21
+        describe_current_position()
 
 
 # read
 def read_command(obj):
     print('5000 command')
-    global current_position
-    global know_combination_flag
+    global current_position, know_combination_flag
     if obj == 0:
         error_unknown_object('read what?')
-    if pt[obj] > -1 and fna(obj) != current_position and fna(obj) != -1:
+    if pt[obj] > -1 and get_object_location(obj) != current_position and get_object_location(obj) != -1:
         error_not_here()
     elif pt[obj] == -1:
         print("there's nothing written on that.")
@@ -433,20 +421,16 @@ def read_command(obj):
 # inventory
 def inventory_command():
     print('6000 command')
-    global ol
-    global om
-    global bucket_full_flag
+    global objects, bucket_full_flag
     print('you are carrying the following:')
     carrying_something = False
-    # print('ol = ', ol)
-    # print('om = ', om)
-    for x in range(1, len(ol)):
-        if ol[x] == -1:
-            print(om[x])
+    for x in range(1, len(objects)):
+        if objects[x].location == -1:
+            print(objects[x].text)
             carrying_something = True
-        if x == 1 and bucket_full_flag and ol[1] == -1:
+        if x == 1 and bucket_full_flag and objects[1].location == -1:
             print('  the bucket is full of water.')
-        if x == 14 and ol[14] == -1:
+        if x == 14 and objects[14].location == -1:
             print('   (better fix it)')
     if not carrying_something:
         print('nothing at all.')
@@ -465,8 +449,7 @@ def quit_command():
 
 
 def final_stats():
-    global gathered_treasures
-    global escaped_flag
+    global gathered_treasures, escaped_flag
     print('7010 command')
     print('you accumulated', gathered_treasures, 'treasures,')
     print('for a score of', gathered_treasures * 20, 'points.')
@@ -497,63 +480,43 @@ def final_stats():
 
 # drop
 def drop_command(obj):
-    global current_position
-    global ol
-    global om
-    global pt
-    global rooms
-    global gg_flag
+    global current_position, objects, pt, rooms, gg_flag
     print('8000 command')
-    if fna(obj) != -1:
+    if get_object_location(obj) != -1:
         print("you aren't carrying it!")
+        return
+
+    x = pt[obj]
+    if (3 < x < 9) or x == 19:
+        print("don't drop *treasures*!")
+    elif current_position == 19 and obj == 19:
+        wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
+        print('a chapel with dancers appears.')
+        rooms[21].moves[3] = 22
+        objects[12].location = -2
+    elif current_position == 22 and obj == 20:
+        wrap_string('even before it hits the ground, the cross fades away!')
+        print('the tablet has disintegrated.')
+        print('you hear music from the organ.')
+        gg_flag = True
+        objects[11].location = -2
+        rooms[22].text = 'chapel'
+        objects[24].text = 'closed organ playing music in the corner'
     else:
-        x = pt[obj]
-        if (3 < x < 9) or x == 19:
-            print("don't drop *treasures*!")
-        elif current_position == 19 and obj == 19:
-            wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
-            print('a chapel with dancers appears.')
-            rooms[21].moves[3] = 22
-            ol[12] = -2
-        elif current_position == 22 and obj == 20:
-            wrap_string('even before it hits the ground, the cross fades away!')
-            print('the tablet has disintegrated.')
-            print('you hear music from the organ.')
-            gg_flag = True
-            ol[11] = -2
-            rooms[22].text = 'chapel'
-            om[24] = 'closed organ playing music in the corner'
-        else:
-            ol[pt[obj]] = current_position
-            print('ok')
+        objects[pt[obj]].location = current_position
+        print('ok')
 
 
 # say
 def say_command(obj, word):
-    global current_position
-    global snake_charmed_flag
-    global ol
-    global portal_visible_flag
-    global rooms
+    # global current_position, ol, rooms, snake_charmed_flag, portal_visible_flag
     print('9000 command')
     if obj == 0:
         print('say what???')
     elif obj == 14:
-        if current_position != 4 or snake_charmed_flag:
-            print('nothing happens.')
-        else:
-            wrap_string('the snake is charmed by the very utterance of your words.')
-            snake_charmed_flag = True
-            ol[2] = -2
-            ol[3] = 4
+        say_ritnew()
     elif obj == 15:
-        if current_position != 8 or portal_visible_flag:
-            print('nothing happens.')
-        else:
-            print('a portal has opened in the north wall!!')
-            portal_visible_flag = True
-            rooms[8].moves[0] = 17
-            ol[18] = 8
+        say_victory()
     elif obj > 28:
         print("a hollow voice says, 'wrong adventure'.")
     else:
@@ -562,16 +525,35 @@ def say_command(obj, word):
         print('nothing happens.')
 
 
+def say_victory():
+    global objects, rooms, current_position, portal_visible_flag
+    if current_position != 8 or portal_visible_flag:
+        print('nothing happens.')
+    else:
+        print('a portal has opened in the north wall!!')
+        portal_visible_flag = True
+        rooms[8].moves[0] = 17
+        objects[18].location = 8
+
+
+def say_ritnew():
+    global current_position, objects, snake_charmed_flag
+    if current_position != 4 or snake_charmed_flag:
+        print('nothing happens.')
+    else:
+        wrap_string('the snake is charmed by the very utterance of your words.')
+        snake_charmed_flag = True
+        objects[2].location = -2
+        objects[3].location = 4
+
+
 # pour
 def pour_command(obj):
-    global ol
-    global current_position
-    global bucket_full_flag
-    global fire_burning_flag
+    global current_position, objects, bucket_full_flag, fire_burning_flag
     print('10000 command')
     if obj != 4:
         print("i wouldn't know how.")
-    elif ol[1] != -1 and ol[1] != current_position:
+    elif objects[1].location != -1 and objects[1].location != current_position:
         error_not_here()
     elif not bucket_full_flag:
         print('the bucket is already empty')
@@ -585,21 +567,18 @@ def pour_command(obj):
         print('the flames!')
         fire_burning_flag = False
         bucket_full_flag = False
-        line699()
+        describe_current_position()
 
 
 # fill
 def fill_command(obj):
-    global pt
-    global current_position
-    global bucket_full_flag
-    global pool_flooded_flag
+    global current_position, pt, bucket_full_flag, pool_flooded_flag
     print('11000 command')
     if obj == 0:
         error_unknown_object('what?')
     elif pt[obj] == -1:
         print("that wouldn't hold anything.")
-    elif fna(obj) != current_position and fna(obj) != -1:
+    elif get_object_location(obj) != current_position and get_object_location(obj) != -1:
         error_not_here()
     elif obj != 4:
         print("that wouldn't hold anything.")
@@ -616,44 +595,27 @@ def fill_command(obj):
 
 # unlock object
 def unlock_command(obj):
-    global current_position
-    global ol
+    global current_position, objects
     print('12000 command')
     if obj == 0:
         error_unknown_object('what?')
     elif obj != 12 and obj != 27:
         print("i wouldn't know how to unlock one.")
-        line700()
+        main_command_loop()
     elif current_position != 0 and current_position != 5 and current_position != 6:
         error_not_here()
     elif current_position == 0 and obj == 12:
-        line12200()
+        unlock_front_door()
     elif current_position == 5 and obj == 27:
-        line12300()
-    elif current_position != 6 or obj != 12 or ol[16] != -2:
+        unlock_vault()
+    elif current_position != 6 or obj != 12 or objects[16].location != -2:
         error_not_here()
     else:
         print('the trapdoor has no lock')
 
 
-def line12200():
-    global dungeon_unlocked_flag
-    global ol
-    if dungeon_unlocked_flag:
-        print("it's already unlocked.")
-    elif ol[20] != -1:
-        print('i need a key.')
-    else:
-        print('the door easily unlocks and swings open.')
-        dungeon_unlocked_flag = True
-        look_command()
-
-
-def line12300():
-    global vault_open_flag
-    global found_vault_flag
-    global know_combination_flag
-    global rooms
+def unlock_vault():
+    global rooms, vault_open_flag, found_vault_flag, know_combination_flag
     if vault_open_flag:
         print("it's already open.")
     elif not found_vault_flag:
@@ -665,32 +627,37 @@ def line12300():
         print('<click!> the door swings open.')
         vault_open_flag = True
         rooms[5].moves[2] = 46
-        look_command()
+        describe_current_position()
+
+
+def unlock_front_door():
+    global objects, dungeon_unlocked_flag
+    if dungeon_unlocked_flag:
+        print("it's already unlocked.")
+    elif objects[20].location != -1:
+        print('i need a key.')
+    else:
+        print('the door easily unlocks and swings open.')
+        dungeon_unlocked_flag = True
+        describe_current_position()
 
 
 # look
-def look_command():
-    global current_position
-    global rooms
-    global om
-    global ol
-    global pool_flooded_flag
-    global fire_burning_flag
-    global found_vault_flag
-    global vault_open_flag
-    global dungeon_unlocked_flag
+def describe_current_position():
+    global current_position, rooms, objects
+    global pool_flooded_flag, fire_burning_flag, found_vault_flag, vault_open_flag, dungeon_unlocked_flag
     wrap_string(f'you are in the {rooms[current_position].text}')
-    for x in range(1, len(ol)):
-        if ol[x] == current_position:
-            wrap_string(f'there is a {om[x]} here')
-        if x == 1 and bucket_full_flag and ol[1] == current_position:
+    for x in range(1, len(objects)):
+        if objects[x].location == current_position:
+            wrap_string(f'there is a {objects[x].text} here')
+        if x == 1 and bucket_full_flag and objects[1].location == current_position:
             print("the bucket is full of water")
     if current_position == 25:
         if pool_flooded_flag:
             print('the pool is full of liquid mercury')
         else:
             print("the pool's empty")
-            if ol[7] == 48:
+            if objects[7].location == 48:
                 print('i see something shiny in the pool!')
     if current_position == 10 and fire_burning_flag:
         print('there is a hot fire on the south wall!')
@@ -724,8 +691,7 @@ def look_command():
 
 # go
 def go_command(obj):
-    global current_position
-    global ol
+    global current_position, objects
     print('15000 command')
     if obj != 8 and obj != 18 and obj != 28:
         error_unknown_object('what?')
@@ -737,28 +703,26 @@ def go_command(obj):
         error_not_here()
     elif obj == 8:
         current_position = 25
-        line699()
+        describe_current_position()
     elif obj == 28 and pool_flooded_flag:
         print('the pool is full of mercury!')
     elif obj == 28:
         current_position = 48
     elif current_position == 27:
         current_position = 2
-        line699()
-    elif ol[9] == -1:
+        describe_current_position()
+    elif objects[9].location == -1:
         print('the suits of armor try to stop you,')
         print('but you fight them off with your sword.')
         current_position = 27
-        line699()
+        describe_current_position()
     else:
         wrap_string('the suits of armor prevent you from going up!')
 
 
 # north
 def north_command():
-    global current_position
-    global dungeon_unlocked_flag
-    global rooms
+    global current_position, rooms, dungeon_unlocked_flag
     if current_position == 0 and not dungeon_unlocked_flag:
         print('the door is locked shut.')
     elif rooms[current_position].moves[0] == 0:
@@ -766,14 +730,12 @@ def north_command():
     elif current_position == 0:
         print('the door slams shut behind you!')
     current_position = rooms[current_position].moves[0]
-    look_command()
+    describe_current_position()
 
 
 # south
 def south_command():
-    global current_position
-    global fire_burning_flag
-    global rooms
+    global current_position, rooms, fire_burning_flag
     print('17000 command')
     if current_position == 10 and fire_burning_flag:
         print('you have burnt to a crisp!')
@@ -783,15 +745,12 @@ def south_command():
         error_no_path()
     else:
         current_position = rooms[current_position].moves[1]
-        line699()
+        describe_current_position()
 
 
 # east
 def east_command():
-    global current_position
-    global snake_charmed_flag
-    global angry_snake_flag
-    global rooms
+    global current_position, rooms, snake_charmed_flag, angry_snake_flag
     print('17010 command')
     if current_position == 4 and not snake_charmed_flag and not angry_snake_flag:
         print('the snake is about to attack!')
@@ -805,19 +764,18 @@ def east_command():
         error_no_path()
     else:
         current_position = rooms[current_position].moves[2]
-        line699()
+        describe_current_position()
 
 
 # west
 def west_command():
-    global current_position
-    global rooms
+    global current_position, rooms
     print('19000 command')
     if rooms[current_position].moves[3] == 0:
         error_no_path()
     else:
         current_position = rooms[current_position].moves[3]
-        line699()
+        describe_current_position()
 
 
 # score
@@ -841,59 +799,42 @@ def score_command():
 
 # turn
 def turn_command(obj):
-    global current_position
-    global pool_flooded_flag
-    global ol
+    global current_position, objects, pool_flooded_flag
     print('21000 command')
     if obj != 7:
         print("i don't know how to turn such a thing.")
-        line699()
+        describe_current_position()
     elif current_position != 26:
         error_not_here()
     else:
         wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
         print('flowing through the pipes.')
         pool_flooded_flag = not pool_flooded_flag
-        if not pool_flooded_flag and ol[7] == -3:
-            ol[7] = 25
-        elif pool_flooded_flag and ol[7] == 25:
-            ol[7] = -3
+        if not pool_flooded_flag and objects[7].location == -3:
+            objects[7].location = 25
+        elif pool_flooded_flag and objects[7].location == 25:
+            objects[7].location = -3
 
 
 # jump
 def jump_command():
-    global ol
-    global current_position
-    global escaped_flag
-    global jump_warning_flag
+    global current_position, objects, escaped_flag, jump_warning_flag
     print('22000 command')
     if current_position != 27 and current_position != 29 and current_position != 32:
         print("there's nowhere to jump.")
-        line700()
+        main_command_loop()
     else:
         print('you jump..')
         if current_position == 27:
-            if jump_warning_flag:
-                print("now you've done it.  you ignored")
-                print("my warning, and as a result")
-                print("you have broken your neck!")
-                print("you are dead.")
-                exit()
-            else:
-                print('you have landed down-stairs,')
-                print('and narrowly escaped serious')
-                print("injury.  please don't try it again.")
-                jump_warning_flag = True
-                current_position = 2
-                line699()
-        if ol[14] == -1:
+            jump_down_stairs()
+        elif objects[14].location == -1:
             print('there is no way to open the parachute!')
-        elif ol[27] == -1:
+        elif objects[27].location == -1:
             print('you yank the ripcord and the')
             print("'chute comes billowing out.")
             if current_position == 32:
                 current_position = 40
-                line699()
+                describe_current_position()
             else:
                 print('you land safely')
                 print('congratulations on escaping!')
@@ -905,10 +846,26 @@ def jump_command():
         exit()
 
 
+def jump_down_stairs():
+    global jump_warning_flag, current_position
+    if jump_warning_flag:
+        print("now you've done it.  you ignored")
+        print("my warning, and as a result")
+        print("you have broken your neck!")
+        print("you are dead.")
+        exit()
+    else:
+        print('you have landed down-stairs,')
+        print('and narrowly escaped serious')
+        print("injury.  please don't try it again.")
+        jump_warning_flag = True
+        current_position = 2
+        describe_current_position()
+
+
 # swim
 def swim_command():
-    global current_position
-    global pool_flooded_flag
+    global current_position, pool_flooded_flag
     print('24000 command')
     if current_position != 19 and current_position != 25:
         print("there's nothing here to swim in!")
@@ -922,9 +879,7 @@ def swim_command():
 
 # fix
 def fix_command(obj):
-    global current_position
-    global ol
-    global pt
+    global current_position, objects, pt
     print('25000 command')
     if obj == 0:
         error_unknown_object('what')
@@ -932,18 +887,18 @@ def fix_command(obj):
         print("i ain't no plumber!")
     elif obj != 17:
         print("i wouldn't know how.")
-    elif fna(obj) != current_position and fna(obj) != -1:
+    elif get_object_location(obj) != current_position and get_object_location(obj) != -1:
         error_not_here()
-    elif ol[14] == -2:
+    elif objects[14].location == -2:
         print("it's already fixed.")
-    elif ol[17] != -1:
+    elif objects[17].location != -1:
         print("i'll need a ripcord.")
     else:
         print("i'm no expert, but i think it'll work.")
-        ol[27] = ol[14]
-        ol[14] = -2
+        objects[27].location = objects[14].location
+        objects[14].location = -2
         pt[17] = 27
-        ol[17] = 0
+        objects[17].location = 0
 
 
 def error_unknown_object(unknown_object):
@@ -989,4 +944,4 @@ def welcome_banner():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    line0()
+    main()
