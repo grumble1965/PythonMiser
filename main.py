@@ -202,7 +202,7 @@ def main_command_loop():
         input_str.strip()
         parsed_words = input_str.split()
         if len(parsed_words) < 1 or len(parsed_words) > 2:
-            print('please type a one or two world command')
+            print('please type a one or two word command')
             continue
 
         command_verb = parsed_words[0]
@@ -212,7 +212,7 @@ def main_command_loop():
         verb_index = -1
         for x in range(1, len(verbs)):
             if command_verb == verbs[x]:
-                print(f'command {verbs[x]} {x}')
+                # print(f'command {verbs[x]} {x}')
                 verb_index = x
         if verb_index == -1:
             error_unknown_object(command_verb)
@@ -309,7 +309,6 @@ def get_take_command(obj):
 # move, slide, push
 def move_slide_push_command(obj):
     global current_position, rooms, command_objects, items, found_vault_flag
-    print('2000 command')
     if obj == 0:
         error_unknown_object('move what?')
     elif obj == 13 and current_position == 5 and rooms[5].moves[3] == 0:
@@ -335,7 +334,6 @@ def move_slide_push_command(obj):
 # open
 # todo  fix this control flow
 def open_command(obj):
-    print('4000 command')
     if obj == 0:
         error_unknown_object('open what?')
     elif obj != 11:
@@ -349,7 +347,6 @@ def open_command(obj):
 
 def line4030(obj):
     global current_position, dungeon_unlocked_flag
-    print('line4030')
     if obj == 7:
         print('try turning it.')
     elif obj != 12:
@@ -421,7 +418,6 @@ def line4230(obj):
 
 # read
 def read_command(obj):
-    print('5000 command')
     global current_position, know_combination_flag
     if obj == 0:
         error_unknown_object('read what?')
@@ -443,7 +439,6 @@ def read_command(obj):
 
 # inventory
 def inventory_command():
-    print('6000 command')
     global items, bucket_full_flag
     print('you are carrying the following:')
     carrying_something = False
@@ -461,7 +456,6 @@ def inventory_command():
 
 # quit
 def quit_command():
-    print('7000 command')
     print('do you indeed wish to quit now?')
     input_str = get_input()
     if input_str[0].lower() != 'y':
@@ -473,7 +467,6 @@ def quit_command():
 
 def final_stats():
     global gathered_treasures, escaped_flag
-    print('7010 command')
     print('you accumulated', gathered_treasures, 'treasures,')
     print('for a score of', gathered_treasures * 20, 'points.')
     print('(100 possible)')
@@ -504,7 +497,6 @@ def final_stats():
 # drop
 def drop_command(obj):
     global current_position, items, command_objects, rooms, gg_flag
-    print('8000 command')
     if get_item_location(obj) != -1:
         print("you aren't carrying it!")
         return
@@ -533,7 +525,6 @@ def drop_command(obj):
 # say
 def say_command(obj, word):
     # global current_position, ol, rooms, snake_charmed_flag, portal_visible_flag
-    print('9000 command')
     if obj == 0:
         print('say what???')
     elif obj == 14:
@@ -573,7 +564,6 @@ def say_ritnew():
 # pour
 def pour_command(obj):
     global current_position, items, bucket_full_flag, fire_burning_flag
-    print('10000 command')
     if obj != 4:
         print("i wouldn't know how.")
     elif items[1].location != -1 and items[1].location != current_position:
@@ -596,7 +586,6 @@ def pour_command(obj):
 # fill
 def fill_command(obj):
     global current_position, command_objects, bucket_full_flag, pool_flooded_flag
-    print('11000 command')
     if obj == 0:
         error_unknown_object('what?')
     elif command_objects[obj].item_id == -1:
@@ -619,7 +608,6 @@ def fill_command(obj):
 # unlock object
 def unlock_command(obj):
     global current_position, items
-    print('12000 command')
     if obj == 0:
         error_unknown_object('what?')
     elif obj != 12 and obj != 27:
@@ -684,7 +672,7 @@ def describe_current_position():
                 print('i see something shiny in the pool!')
     if current_position == 10 and fire_burning_flag:
         print('there is a hot fire on the south wall!')
-        print('if I go that way I''ll burn to death!')
+        print("if I go that way I'll burn to death!")
     if current_position == 16:
         wrap_string("a rich, full voice says, 'ritnew is a charming word'.")
     if current_position == 26:
@@ -715,7 +703,6 @@ def describe_current_position():
 # go
 def go_command(obj):
     global current_position, items
-    print('15000 command')
     if obj != 8 and obj != 18 and obj != 28:
         error_unknown_object('what?')
     elif obj == 8 and current_position != 48:
@@ -748,8 +735,10 @@ def north_command():
     global current_position, rooms, dungeon_unlocked_flag
     if current_position == 0 and not dungeon_unlocked_flag:
         print('the door is locked shut.')
+        return
     elif rooms[current_position].moves[0] == 0:
         error_no_path()
+        return
     elif current_position == 0:
         print('the door slams shut behind you!')
     current_position = rooms[current_position].moves[0]
@@ -759,7 +748,6 @@ def north_command():
 # south
 def south_command():
     global current_position, rooms, fire_burning_flag
-    print('17000 command')
     if current_position == 10 and fire_burning_flag:
         print('you have burnt to a crisp!')
         exit()
@@ -774,7 +762,6 @@ def south_command():
 # east
 def east_command():
     global current_position, rooms, snake_charmed_flag, angry_snake_flag
-    print('17010 command')
     if current_position == 4 and not snake_charmed_flag and not angry_snake_flag:
         print('the snake is about to attack!')
         angry_snake_flag = True
@@ -793,7 +780,6 @@ def east_command():
 # west
 def west_command():
     global current_position, rooms
-    print('19000 command')
     if rooms[current_position].moves[3] == 0:
         error_no_path()
     else:
@@ -804,7 +790,6 @@ def west_command():
 # score
 def score_command():
     global gathered_treasures
-    print('20000 command')
     print('if you were to quit now,')
     print('you would have a score of')
     print(gathered_treasures * 20, 'points.')
@@ -823,7 +808,6 @@ def score_command():
 # turn
 def turn_command(obj):
     global current_position, items, pool_flooded_flag
-    print('21000 command')
     if obj != 7:
         print("i don't know how to turn such a thing.")
         describe_current_position()
@@ -842,7 +826,6 @@ def turn_command(obj):
 # jump
 def jump_command():
     global current_position, items, escaped_flag, jump_warning_flag
-    print('22000 command')
     if current_position != 27 and current_position != 29 and current_position != 32:
         print("there's nowhere to jump.")
         main_command_loop()
@@ -889,7 +872,6 @@ def jump_down_stairs():
 # swim
 def swim_command():
     global current_position, pool_flooded_flag
-    print('24000 command')
     if current_position != 19 and current_position != 25:
         print("there's nothing here to swim in!")
     elif current_position == 19:
@@ -903,7 +885,6 @@ def swim_command():
 # fix
 def fix_command(obj):
     global current_position, items, command_objects
-    print('25000 command')
     if obj == 0:
         error_unknown_object('what')
     elif obj == 7:
