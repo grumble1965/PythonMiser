@@ -34,7 +34,7 @@ class ItemClass:
 #
 # class for things that a command can mention
 #
-class CommandObjectClass:
+class CommandSubjectClass:
     def __init__(self, text, item_id):
         self.text = text
         self.item_id = item_id
@@ -53,7 +53,6 @@ class VerbClass:
 def clear_screen():
     read_line.console.home()
     read_line.console.clear_to_end_of_window()
-    pass
 
 
 def wait_for_keypress():
@@ -202,7 +201,7 @@ def initialize_data():
         temp_list.append(VerbClass(xx, yy))
     verbs = temp_list
 
-    command_object_data = [
+    command_subject_data = [
         ('--unused--', -999),
         ('ripc', 17), ('mat', 10), ('pape', 13), ('buck', 1), ('swor', 9),
         ('key', 20), ('valv', -1), ('ladd', -1), ('slip', 19), ('rug', 15),
@@ -212,8 +211,8 @@ def initialize_data():
         ('pain', 8), ('vaul', -1), ('pool', -1), ('xyzz', -1), ('plug', -1)
     ]
     temp_list = []
-    for (xx, yy) in command_object_data:
-        co = CommandObjectClass(xx, yy)
+    for (xx, yy) in command_subject_data:
+        co = CommandSubjectClass(xx, yy)
         temp_list.append(co)
     command_subjects = temp_list
 
@@ -258,6 +257,7 @@ def main_command_loop():
             if command_verb == verbs[x].text:
                 # print(f' command {verbs[x].text} {x}')
                 verb_index = x
+                break
         if verb_index == -1:
             error_unknown_object(command_verb)
             continue
@@ -520,7 +520,7 @@ def drop_command(subject_index, subject):
     elif current_position == 19 and subject_index == 19:
         wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
         print('a chapel with dancers appears.')
-        rooms[21].moves[3] = 22
+        rooms[21].moves[2] = 22
         items[12].location = -2
     elif current_position == 22 and subject_index == 20:
         wrap_string('even before it hits the ground, the cross fades away!')
