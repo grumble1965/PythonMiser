@@ -82,6 +82,10 @@ current_position = 0
 help_strings, help_index = [], 0
 
 
+# constants
+MOVE_NORTH, MOVE_SOUTH, MOVE_EAST, MOVE_WEST = 0, 1, 2, 3
+
+
 def main():
     welcome_banner()
     initialize_data()
@@ -90,9 +94,9 @@ def main():
     main_command_loop()
 
 
-def get_item_location(x):
+def get_item_location(subject_idx):
     global items, command_subjects
-    return items[command_subjects[x].item_id].location
+    return items[command_subjects[subject_idx].item_id].location
 
 
 def initialize_data():
@@ -320,7 +324,7 @@ def move_slide_push_command(subject_index, subject):
     global current_position, rooms, command_subjects, items, found_vault_flag
     if subject_index == 0:
         error_unknown_object('move what?')
-    elif subject_index == 13 and current_position == 5 and rooms[5].moves[3] == 0:
+    elif subject_index == 13 and current_position == 5 and rooms[5].moves[MOVE_EAST] == 0:
         print('behind the cabinet is a vault!')
         found_vault_flag = True
         describe_current_position()
@@ -521,7 +525,7 @@ def drop_command(subject_index, subject):
     elif current_position == 19 and subject_index == 19:
         wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
         print('a chapel with dancers appears.')
-        rooms[21].moves[2] = 22
+        rooms[21].moves[MOVE_EAST] = 22
         items[12].location = -2
     elif current_position == 22 and subject_index == 20:
         wrap_string('even before it hits the ground, the cross fades away!')
@@ -560,7 +564,7 @@ def say_victory():
     else:
         print('a portal has opened in the north wall!!')
         portal_visible_flag = True
-        rooms[8].moves[0] = 17
+        rooms[8].moves[MOVE_NORTH] = 17
         items[18].location = 8
 
 
@@ -654,7 +658,7 @@ def unlock_vault():
         print("ok, let's see.  12..35..6..")
         print('<click!> the door swings open.')
         vault_open_flag = True
-        rooms[5].moves[2] = 46
+        rooms[5].moves[MOVE_EAST] = 46
         describe_current_position()
 
 
@@ -711,13 +715,13 @@ def describe_current_position():
         print('an open door leads north.')
     if current_position != 48:
         print('obvious exits:')
-        if rooms[current_position].moves[0] > 0:
+        if rooms[current_position].moves[MOVE_NORTH] > 0:
             print('n ', end='')
-        if rooms[current_position].moves[1] > 0:
+        if rooms[current_position].moves[MOVE_SOUTH] > 0:
             print('s ', end='')
-        if rooms[current_position].moves[2] > 0:
+        if rooms[current_position].moves[MOVE_EAST] > 0:
             print('e ', end='')
-        if rooms[current_position].moves[3] > 0:
+        if rooms[current_position].moves[MOVE_WEST] > 0:
             print('w ', end='')
         print('')
 
@@ -760,12 +764,12 @@ def north_command(subject_index, subject):
     if current_position == 0 and not dungeon_unlocked_flag:
         print('the door is locked shut.')
         return
-    elif rooms[current_position].moves[0] == 0:
+    elif rooms[current_position].moves[MOVE_NORTH] == 0:
         error_no_path()
         return
     elif current_position == 0:
         print('the door slams shut behind you!')
-    current_position = rooms[current_position].moves[0]
+    current_position = rooms[current_position].moves[MOVE_NORTH]
     describe_current_position()
 
 
@@ -777,10 +781,10 @@ def south_command(subject_index, subject):
         print('you have burnt to a crisp!')
         exit()
 
-    if rooms[current_position].moves[1] == 0:
+    if rooms[current_position].moves[MOVE_SOUTH] == 0:
         error_no_path()
     else:
-        current_position = rooms[current_position].moves[1]
+        current_position = rooms[current_position].moves[MOVE_SOUTH]
         describe_current_position()
 
 
@@ -796,10 +800,10 @@ def east_command(subject_index, subject):
         print('you are dead.')
         exit()
 
-    if rooms[current_position].moves[2] == 0:
+    if rooms[current_position].moves[MOVE_EAST] == 0:
         error_no_path()
     else:
-        current_position = rooms[current_position].moves[2]
+        current_position = rooms[current_position].moves[MOVE_EAST]
         describe_current_position()
 
 
@@ -807,10 +811,10 @@ def east_command(subject_index, subject):
 def west_command(subject_index, subject):
     _, _ = subject_index, subject
     global current_position, rooms
-    if rooms[current_position].moves[3] == 0:
+    if rooms[current_position].moves[MOVE_WEST] == 0:
         error_no_path()
     else:
-        current_position = rooms[current_position].moves[3]
+        current_position = rooms[current_position].moves[MOVE_WEST]
         describe_current_position()
 
 
