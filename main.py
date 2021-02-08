@@ -1,8 +1,9 @@
 # This is a Python port of the Miser's House BASIC adventure.
 #
-# BASIC original (c) 1981 M. J. Winter
+# BASIC original by M. J. Winter
+# (c) 1981 The Code Works
 #
-# Python Version (c) 2021  Kelly M Hall
+# Python Version (c) 2021  Kelly M. Hall
 # This work is licensed under a Creative Commons
 # Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 #
