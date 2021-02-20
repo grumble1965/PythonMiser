@@ -345,27 +345,39 @@ def move_slide_push_command(subject_index, subject):
 
 
 # open
-# todo  fix this control flow
 def open_command(subject_index, subject):
     _ = subject
     if subject_index == 0:
         error_unknown_object('open what?')
-    elif subject_index != 11:
-        line4030(subject_index)
-    elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
-        line4030(subject_index)
+    elif subject_index == 11:
+        open_book(subject_index)
+    elif subject_index == 7:
+        print('try turning it.')
+    elif subject_index == 12:
+        open_door()
+    elif subject_index == 13:
+        open_cabinet()
+    elif subject_index == 22:
+        open_bag(subject_index)
+    elif subject_index == 27:
+        open_vault()
+    elif subject_index == 16:
+        open_organ()
+    else:
+        print("i don't know how to open that.")
+
+
+def open_book(subject_index):
+    if get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
+        error_not_here()
     else:
         wrap_string("scrawled in blood on the inside front cover is the message,")
         print("''victory' is a prize-winning word'.")
 
 
-def line4030(subject_index):
+def open_door():
     global current_position, dungeon_unlocked_flag
-    if subject_index == 7:
-        print('try turning it.')
-    elif subject_index != 12:
-        line4120(subject_index)
-    elif current_position == 0 and not dungeon_unlocked_flag:
+    if current_position == 0 and not dungeon_unlocked_flag:
         print('sorry, the door is locked.')
     elif current_position == 0 and dungeon_unlocked_flag:
         print("it's already open.")
@@ -377,33 +389,27 @@ def line4030(subject_index):
         describe_current_position()
 
 
-def line4120(subject_index):
-    global current_position, items
-    if subject_index != 13:
-        line4160(subject_index)
-    elif items[26].location != current_position:
+def open_cabinet():
+    global current_position
+    if items[26].location != current_position:
         error_not_here()
     else:
         print('the cabinet is empty and dusty.')
         wrap_string("scribbled in the dust on one shelf are the words, 'behind me'.")
 
 
-def line4160(subject_index):
+def open_bag(subject_index):
     global current_position
-    if subject_index != 22:
-        line4190(subject_index)
-    elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
+    if get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
         error_not_here()
     else:
         print('the bag is knotted securely.')
         print("it won't open.")
 
 
-def line4190(subject_index):
+def open_vault():
     global current_position, found_vault_flag, vault_open_flag
-    if subject_index != 27:
-        line4230(subject_index)
-    elif current_position != 5 or not found_vault_flag:
+    if current_position != 5 or not found_vault_flag:
         error_not_here()
     elif vault_open_flag:
         print("it's already open.")
@@ -411,11 +417,9 @@ def line4190(subject_index):
         print("i can't, it's locked.")
 
 
-def line4230(subject_index):
+def open_organ():
     global gg_flag, items
-    if subject_index != 16:
-        print("i don't know how to open that.")
-    elif current_position != 21:
+    if current_position != 21:
         error_not_here()
     elif not gg_flag:
         print("it's stuck shut.")
