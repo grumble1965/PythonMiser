@@ -12,6 +12,7 @@
 import pyreadline.rlmain
 
 # variables
+# todo put these into the miser class
 program_name, cursor_issue = 'miser', '27'
 text_wrap_width = 80
 items = []
@@ -36,14 +37,29 @@ read_line = pyreadline.Readline()
 prompt = "> "
 
 
+def get_item_location(subject_idx):
+    global items, command_subjects
+    return items[command_subjects[subject_idx].item_id].location
+
+
+def clear_screen():
+    read_line.console.home()
+    read_line.console.clear_to_end_of_window()
+
+
+def wait_for_keypress():
+    _ = read_line.readline()
+
+
+def delay():
+    pass
+
+
 #
 # Class for the overall Miser game
 #
 class Miser:
     def __init__(self):
-        pass
-
-    def initialize_data(self):
         # todo: get rid of magic numbers
         global rooms
         global items
@@ -113,37 +129,37 @@ class Miser:
         rooms = temp_list
 
         verb_data = [
-            ('--unused--', unused_command),
-            ('get', get_take_command),
-            ('take', get_take_command),
-            ('move', move_slide_push_command),
-            ('slid', move_slide_push_command),
-            ('push', move_slide_push_command),
-            ('open', open_command),
-            ('read', read_command),
-            ('inve', inventory_command),
-            ('quit', quit_command),
-            ('drop', drop_command),
-            ('say', say_command),
-            ('pour', pour_command),
-            ('fill', fill_command),
-            ('unlo', unlock_command),
-            ('look', look_command),
-            ('go', go_command),
-            ('nort', north_command),
-            ('n', north_command),
-            ('sout', south_command),
-            ('s', south_command),
-            ('east', east_command),
-            ('e', east_command),
-            ('west', west_command),
-            ('w', west_command),
-            ('scor', score_command),
-            ('turn', turn_command),
-            ('jump', jump_command),
-            ('swim', swim_command),
-            ('i', inventory_command),
-            ('fix', fix_command)
+            ('--unused--', self.unused_command),
+            ('get', self.get_take_command),
+            ('take', self.get_take_command),
+            ('move', self.move_slide_push_command),
+            ('slid', self.move_slide_push_command),
+            ('push', self.move_slide_push_command),
+            ('open', self.open_command),
+            ('read', self.read_command),
+            ('inve', self.inventory_command),
+            ('quit', self.quit_command),
+            ('drop', self.drop_command),
+            ('say', self.say_command),
+            ('pour', self.pour_command),
+            ('fill', self.fill_command),
+            ('unlo', self.unlock_command),
+            ('look', self.look_command),
+            ('go', self.go_command),
+            ('nort', self.north_command),
+            ('n', self.north_command),
+            ('sout', self.south_command),
+            ('s', self.south_command),
+            ('east', self.east_command),
+            ('e', self.east_command),
+            ('west', self.west_command),
+            ('w', self.west_command),
+            ('scor', self.score_command),
+            ('turn', self.turn_command),
+            ('jump', self.jump_command),
+            ('swim', self.swim_command),
+            ('i', self.inventory_command),
+            ('fix', self.fix_command)
         ]
         temp_list = []
         for (xx, yy) in verb_data:
@@ -179,7 +195,6 @@ class Miser:
         ]
         temp_list = []
         for (xx, yy) in item_data:
-            # print('xx = ', xx, 'yy = ', yy)
             temp_list.append(ItemClass(xx, yy))
         items = temp_list
 
@@ -229,6 +244,424 @@ class Miser:
             # call verb handler
             verbs[verb_index].handler(subject_index, subject)
 
+    def unused_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        pass
+
+    # get, take object
+    def get_take_command(self, subject_index, subject):
+        _ = subject
+        global current_position, command_subjects, items, gathered_treasures
+        if subject_index == 0:
+            error_unknown_object('what?')
+        elif command_subjects[subject_index].item_id == -1:
+            print('i am unable to do that.')
+        elif get_item_location(subject_index) == -1:
+            print("you're already carrying it")
+        elif get_item_location(subject_index) != current_position:
+            error_not_here()
+        else:
+            items[command_subjects[subject_index].item_id].location = -1
+            print('ok')
+            if (3 < command_subjects[subject_index].item_id < 9) or command_subjects[subject_index].item_id == 19:
+                print('you got a treasure!')
+                gathered_treasures += 1
+            if subject_index == 2 and items[20].location == -2:
+                print('you find a door key!')
+                items[20].location = 0
+
+    # move, slide, push
+    def move_slide_push_command(self, subject_index, subject):
+        _ = subject
+        global current_position, rooms, command_subjects, items, found_vault_flag
+        if subject_index == 0:
+            error_unknown_object('move what?')
+        elif subject_index == 13 and current_position == 5 and rooms[5].moves[MOVE_EAST] == 0:
+            print('behind the cabinet is a vault!')
+            found_vault_flag = True
+            describe_current_position()
+        elif command_subjects[subject_index].item_id == -1:
+            print('that item stays put.')
+        elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
+            error_not_here()
+        elif subject_index == 2 and items[20].location == -2:
+            print('you find a door key!')
+            items[20].location = 0
+        elif subject_index == 10 and items[16].location == -2:
+            print('you find a trap door!')
+            items[16].location = 6
+            describe_current_position()
+        else:
+            print('moving it reveals nothing.')
+
+    # open
+    def open_command(self, subject_index, subject):
+        _ = subject
+        if subject_index == 0:
+            error_unknown_object('open what?')
+        elif subject_index == 11:
+            open_book(subject_index)
+        elif subject_index == 7:
+            print('try turning it.')
+        elif subject_index == 12:
+            open_door()
+        elif subject_index == 13:
+            open_cabinet()
+        elif subject_index == 22:
+            open_bag(subject_index)
+        elif subject_index == 27:
+            open_vault()
+        elif subject_index == 16:
+            open_organ()
+        else:
+            print("i don't know how to open that.")
+
+    # read
+    def read_command(self, subject_index, subject):
+        _ = subject
+        global current_position, know_combination_flag
+        if subject_index == 0:
+            error_unknown_object('read what?')
+        elif command_subjects[subject_index].item_id > -1 \
+                and get_item_location(subject_index) != current_position \
+                and get_item_location(subject_index) != -1:
+            error_not_here()
+        elif command_subjects[subject_index].item_id == -1:
+            print("there's nothing written on that.")
+        elif subject_index != 3 and subject_index != 11:
+            print("there's nothing written on that.")
+        elif subject_index == 11:
+            print('the front cover is inscribed in greek.')
+        else:
+            print("it says, '12-35-6'.")
+            print('hmm.. looks like a combination.')
+            know_combination_flag = True
+
+    # inventory
+    def inventory_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global items, bucket_full_flag
+        print('you are carrying the following:')
+        carrying_something = False
+        for x in range(1, len(items)):
+            if items[x].location == -1:
+                print(items[x].text)
+                carrying_something = True
+            if x == 1 and bucket_full_flag and items[1].location == -1:
+                print('  the bucket is full of water.')
+            if x == 14 and items[14].location == -1:
+                print('   (better fix it)')
+        if not carrying_something:
+            print('nothing at all.')
+
+    # quit
+    def quit_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        print('do you indeed wish to quit now?')
+        input_str = get_input()
+        if input_str[0].lower() != 'y':
+            print('ok')
+        else:
+            clear_screen()
+            final_stats()
+
+    # drop
+    def drop_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items, command_subjects, rooms, gg_flag
+        if get_item_location(subject_index) != -1:
+            print("you aren't carrying it!")
+            return
+
+        x = command_subjects[subject_index].item_id
+        if (3 < x < 9) or x == 19:
+            print("don't drop *treasures*!")
+        elif current_position == 19 and subject_index == 19:
+            wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
+            print('a chapel with dancers appears.')
+            rooms[21].moves[MOVE_EAST] = 22
+            items[12].location = -2
+        elif current_position == 22 and subject_index == 20:
+            wrap_string('even before it hits the ground, the cross fades away!')
+            print('the tablet has disintegrated.')
+            print('you hear music from the organ.')
+            gg_flag = True
+            items[11].location = -2
+            rooms[22].text = 'chapel'
+            items[24].text = 'closed organ playing music in the corner'
+        else:
+            items[command_subjects[subject_index].item_id].location = current_position
+            print('ok')
+
+    # say
+    def say_command(self, subject_index, word):
+        # global current_position, ol, rooms, snake_charmed_flag, portal_visible_flag
+        if subject_index == 0:
+            print('say what???')
+        elif subject_index == 14:
+            say_ritnew()
+        elif subject_index == 15:
+            say_victory()
+        elif subject_index > 28:
+            print("a hollow voice says, 'wrong adventure'.")
+        else:
+            print('okay, "', word, '".')
+            delay()
+            print('nothing happens.')
+
+    # pour
+    def pour_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items, bucket_full_flag, fire_burning_flag
+        if subject_index != 4:
+            print("i wouldn't know how.")
+        elif items[1].location != -1 and items[1].location != current_position:
+            error_not_here()
+        elif not bucket_full_flag:
+            print('the bucket is already empty')
+        elif current_position == 19:
+            print('ok')
+        elif current_position != 10 or not fire_burning_flag:
+            print('the water disappears quickly.')
+            bucket_full_flag = False
+        else:
+            print('congratulations! you have vanquished')
+            print('the flames!')
+            fire_burning_flag = False
+            bucket_full_flag = False
+            describe_current_position()
+
+    # fill
+    def fill_command(self, subject_index, subject):
+        _ = subject
+        global current_position, command_subjects, bucket_full_flag, pool_flooded_flag
+        if subject_index == 0:
+            error_unknown_object('what?')
+        elif command_subjects[subject_index].item_id == -1:
+            print("that wouldn't hold anything.")
+        elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
+            error_not_here()
+        elif subject_index != 4:
+            print("that wouldn't hold anything.")
+        elif bucket_full_flag:
+            print("it's already full.")
+        elif current_position == 25 and pool_flooded_flag:
+            print("i'd rather stay away from the mercury.")
+        elif current_position != 23 and current_position != 19:
+            print("i don't see any water here.")
+        else:
+            print('your bucket is now full.')
+            bucket_full_flag = True
+
+    # unlock object
+    def unlock_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items
+        if subject_index == 0:
+            error_unknown_object('what?')
+        elif subject_index != 12 and subject_index != 27:
+            print("i wouldn't know how to unlock one.")
+        elif current_position != 0 and current_position != 5 and current_position != 6:
+            error_not_here()
+        elif current_position == 0 and subject_index == 12:
+            unlock_front_door()
+        elif current_position == 5 and subject_index == 27:
+            unlock_vault()
+        elif current_position != 6 or subject_index != 12 or items[16].location != -2:
+            error_not_here()
+        else:
+            print('the trapdoor has no lock')
+
+    # look
+    def look_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        describe_current_position()
+
+    # go
+    def go_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items
+        if subject_index != 8 and subject_index != 18 and subject_index != 28:
+            error_unknown_object('what?')
+        elif subject_index == 8 and current_position != 48:
+            error_not_here()
+        elif subject_index == 18 and current_position != 2 and current_position != 27:
+            error_not_here()
+        elif subject_index == 28 and current_position != 25:
+            error_not_here()
+        elif subject_index == 8:
+            current_position = 25
+            describe_current_position()
+        elif subject_index == 28 and pool_flooded_flag:
+            print('the pool is full of mercury!')
+        elif subject_index == 28:
+            current_position = 48
+        elif current_position == 27:
+            current_position = 2
+            describe_current_position()
+        elif items[9].location == -1:
+            print('the suits of armor try to stop you,')
+            print('but you fight them off with your sword.')
+            current_position = 27
+            describe_current_position()
+        else:
+            wrap_string('the suits of armor prevent you from going up!')
+
+    # north
+    def north_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, rooms, dungeon_unlocked_flag
+        if current_position == 0 and not dungeon_unlocked_flag:
+            print('the door is locked shut.')
+            return
+        elif rooms[current_position].moves[MOVE_NORTH] == 0:
+            error_no_path()
+            return
+        elif current_position == 0:
+            print('the door slams shut behind you!')
+        current_position = rooms[current_position].moves[MOVE_NORTH]
+        describe_current_position()
+
+    # south
+    def south_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, rooms, fire_burning_flag
+        if current_position == 10 and fire_burning_flag:
+            print('you have burnt to a crisp!')
+            exit()
+        elif rooms[current_position].moves[MOVE_SOUTH] == 0:
+            error_no_path()
+        else:
+            current_position = rooms[current_position].moves[MOVE_SOUTH]
+            describe_current_position()
+
+    # east
+    def east_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, rooms, snake_charmed_flag, angry_snake_flag
+        if current_position == 4 and not snake_charmed_flag and not angry_snake_flag:
+            print('the snake is about to attack!')
+            angry_snake_flag = True
+        elif current_position == 4 and not snake_charmed_flag:
+            print('the snake bites you!')
+            print('you are dead.')
+            exit()
+        elif rooms[current_position].moves[MOVE_EAST] == 0:
+            error_no_path()
+        else:
+            current_position = rooms[current_position].moves[MOVE_EAST]
+            describe_current_position()
+
+    # west
+    def west_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, rooms
+        if rooms[current_position].moves[MOVE_WEST] == 0:
+            error_no_path()
+        else:
+            current_position = rooms[current_position].moves[MOVE_WEST]
+            describe_current_position()
+
+    # score
+    def score_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global gathered_treasures
+        print('if you were to quit now,')
+        print('you would have a score of')
+        print(gathered_treasures * 20, 'points.')
+        print('(100 possible)')
+        while True:
+            print('do you indeed wish to quit now? ')
+            input_str = get_input()
+            if input_str[0].lower() == 'y':
+                final_stats()
+            elif input_str[0].lower() == 'n':
+                print('ok')
+                print()
+                break
+
+    # turn
+    def turn_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items, pool_flooded_flag
+        if subject_index != 7:
+            print("i don't know how to turn such a thing.")
+            describe_current_position()
+        elif current_position != 26:
+            error_not_here()
+        else:
+            wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
+            print('flowing through the pipes.')
+            pool_flooded_flag = not pool_flooded_flag
+            if not pool_flooded_flag and items[7].location == -3:
+                items[7].location = 25
+            elif pool_flooded_flag and items[7].location == 25:
+                items[7].location = -3
+
+    # jump
+    def jump_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, items, escaped_flag, jump_warning_flag
+        if current_position != 27 and current_position != 29 and current_position != 32:
+            print("there's nowhere to jump.")
+        else:
+            print('you jump..')
+            if current_position == 27:
+                jump_down_stairs()
+            elif items[14].location == -1:
+                print('there is no way to open the parachute!')
+            elif items[27].location == -1:
+                print('you yank the ripcord and the')
+                print("'chute comes billowing out.")
+                if current_position == 32:
+                    current_position = 40
+                    describe_current_position()
+                else:
+                    print('you land safely')
+                    print('congratulations on escaping!')
+                    escaped_flag = True
+                    final_stats()
+            print('you hit the ground.')
+            print("you have broken your neck!")
+            print("you are dead.")
+            exit()
+
+    # swim
+    def swim_command(self, subject_index, subject):
+        _, _ = subject_index, subject
+        global current_position, pool_flooded_flag
+        if current_position != 19 and current_position != 25:
+            print("there's nothing here to swim in!")
+        elif current_position == 19:
+            print('the water is only a few inches deep.')
+        elif pool_flooded_flag:
+            print("in mercury?  no way!")
+        else:
+            print('the pool is empty.')
+
+    # fix
+    def fix_command(self, subject_index, subject):
+        _ = subject
+        global current_position, items, command_subjects
+        if subject_index == 0:
+            error_unknown_object('what')
+        elif subject_index == 7:
+            print("i ain't no plumber!")
+        elif subject_index != 17:
+            print("i wouldn't know how.")
+        elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
+            error_not_here()
+        elif items[14].location == -2:
+            print("it's already fixed.")
+        elif items[17].location != -1:
+            print("i'll need a ripcord.")
+        else:
+            print("i'm no expert, but i think it'll work.")
+            items[27].location = items[14].location
+            items[14].location = -2
+            command_subjects[17].item_id = 27
+            items[17].location = 0
+
 
 #
 # class for locations that the adventurer can move between
@@ -264,105 +697,6 @@ class VerbClass:
     def __init__(self, text, handler):
         self.text = text
         self.handler = handler
-
-
-# useful functions
-def clear_screen():
-    read_line.console.home()
-    read_line.console.clear_to_end_of_window()
-
-
-def wait_for_keypress():
-    _ = read_line.readline()
-
-
-def delay():
-    pass
-
-
-def get_item_location(subject_idx):
-    global items, command_subjects
-    return items[command_subjects[subject_idx].item_id].location
-
-
-def unused_command(subject_index, subject):
-    _, _ = subject_index, subject
-    pass
-
-
-# get, take object
-def get_take_command(subject_index, subject):
-    _ = subject
-    global current_position, command_subjects, items, gathered_treasures
-    if subject_index == 0:
-        error_unknown_object('what?')
-    elif command_subjects[subject_index].item_id == -1:
-        print('i am unable to do that.')
-    elif get_item_location(subject_index) == -1:
-        print("you're already carrying it")
-    elif get_item_location(subject_index) != current_position:
-        error_not_here()
-    else:
-        items[command_subjects[subject_index].item_id].location = -1
-        print('ok')
-
-        # line 1030
-        if (3 < command_subjects[subject_index].item_id < 9) or command_subjects[subject_index].item_id == 19:
-            print('you got a treasure!')
-            gathered_treasures += 1
-        # line 1040
-        if subject_index == 2 and items[20].location == -2:
-            print('you find a door key!')
-            items[20].location = 0
-
-
-# move, slide, push
-def move_slide_push_command(subject_index, subject):
-    _ = subject
-    global current_position, rooms, command_subjects, items, found_vault_flag
-    if subject_index == 0:
-        error_unknown_object('move what?')
-    elif subject_index == 13 and current_position == 5 and rooms[5].moves[MOVE_EAST] == 0:
-        print('behind the cabinet is a vault!')
-        found_vault_flag = True
-        describe_current_position()
-    elif command_subjects[subject_index].item_id == -1:
-        print('that item stays put.')
-    elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
-        error_not_here()
-    elif subject_index == 2 and items[20].location == -2:
-        # line 1040
-        print('you find a door key!')
-        items[20].location = 0
-    elif subject_index == 10 and items[16].location == -2:
-        print('you find a trap door!')
-        items[16].location = 6
-        describe_current_position()
-    else:
-        print('moving it reveals nothing.')
-
-
-# open
-def open_command(subject_index, subject):
-    _ = subject
-    if subject_index == 0:
-        error_unknown_object('open what?')
-    elif subject_index == 11:
-        open_book(subject_index)
-    elif subject_index == 7:
-        print('try turning it.')
-    elif subject_index == 12:
-        open_door()
-    elif subject_index == 13:
-        open_cabinet()
-    elif subject_index == 22:
-        open_bag(subject_index)
-    elif subject_index == 27:
-        open_vault()
-    elif subject_index == 16:
-        open_organ()
-    else:
-        print("i don't know how to open that.")
 
 
 def open_book(subject_index):
@@ -432,58 +766,6 @@ def open_organ():
         describe_current_position()
 
 
-# read
-def read_command(subject_index, subject):
-    _ = subject
-    global current_position, know_combination_flag
-    if subject_index == 0:
-        error_unknown_object('read what?')
-    elif command_subjects[subject_index].item_id > -1 \
-            and get_item_location(subject_index) != current_position \
-            and get_item_location(subject_index) != -1:
-        error_not_here()
-    elif command_subjects[subject_index].item_id == -1:
-        print("there's nothing written on that.")
-    elif subject_index != 3 and subject_index != 11:
-        print("there's nothing written on that.")
-    elif subject_index == 11:
-        print('the front cover is inscribed in greek.')
-    else:
-        print("it says, '12-35-6'.")
-        print('hmm.. looks like a combination.')
-        know_combination_flag = True
-
-
-# inventory
-def inventory_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global items, bucket_full_flag
-    print('you are carrying the following:')
-    carrying_something = False
-    for x in range(1, len(items)):
-        if items[x].location == -1:
-            print(items[x].text)
-            carrying_something = True
-        if x == 1 and bucket_full_flag and items[1].location == -1:
-            print('  the bucket is full of water.')
-        if x == 14 and items[14].location == -1:
-            print('   (better fix it)')
-    if not carrying_something:
-        print('nothing at all.')
-
-
-# quit
-def quit_command(subject_index, subject):
-    _, _ = subject_index, subject
-    print('do you indeed wish to quit now?')
-    input_str = get_input()
-    if input_str[0].lower() != 'y':
-        print('ok')
-    else:
-        clear_screen()
-        final_stats()
-
-
 def final_stats():
     global gathered_treasures, escaped_flag
     print('you accumulated', gathered_treasures, 'treasures,')
@@ -513,52 +795,6 @@ def final_stats():
     exit(0)
 
 
-# drop
-def drop_command(subject_index, subject):
-    _ = subject
-    global current_position, items, command_subjects, rooms, gg_flag
-    if get_item_location(subject_index) != -1:
-        print("you aren't carrying it!")
-        return
-
-    x = command_subjects[subject_index].item_id
-    if (3 < x < 9) or x == 19:
-        print("don't drop *treasures*!")
-    elif current_position == 19 and subject_index == 19:
-        wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
-        print('a chapel with dancers appears.')
-        rooms[21].moves[MOVE_EAST] = 22
-        items[12].location = -2
-    elif current_position == 22 and subject_index == 20:
-        wrap_string('even before it hits the ground, the cross fades away!')
-        print('the tablet has disintegrated.')
-        print('you hear music from the organ.')
-        gg_flag = True
-        items[11].location = -2
-        rooms[22].text = 'chapel'
-        items[24].text = 'closed organ playing music in the corner'
-    else:
-        items[command_subjects[subject_index].item_id].location = current_position
-        print('ok')
-
-
-# say
-def say_command(subject_index, word):
-    # global current_position, ol, rooms, snake_charmed_flag, portal_visible_flag
-    if subject_index == 0:
-        print('say what???')
-    elif subject_index == 14:
-        say_ritnew()
-    elif subject_index == 15:
-        say_victory()
-    elif subject_index > 28:
-        print("a hollow voice says, 'wrong adventure'.")
-    else:
-        print('okay, "', word, '".')
-        delay()
-        print('nothing happens.')
-
-
 def say_victory():
     global items, rooms, current_position, portal_visible_flag
     if current_position != 8 or portal_visible_flag:
@@ -579,73 +815,6 @@ def say_ritnew():
         snake_charmed_flag = True
         items[2].location = -2
         items[3].location = 4
-
-
-# pour
-def pour_command(subject_index, subject):
-    _ = subject
-    global current_position, items, bucket_full_flag, fire_burning_flag
-    if subject_index != 4:
-        print("i wouldn't know how.")
-    elif items[1].location != -1 and items[1].location != current_position:
-        error_not_here()
-    elif not bucket_full_flag:
-        print('the bucket is already empty')
-    elif current_position == 19:
-        print('ok')
-    elif current_position != 10 or not fire_burning_flag:
-        print('the water disappears quickly.')
-        bucket_full_flag = False
-    else:
-        print('congratulations! you have vanquished')
-        print('the flames!')
-        fire_burning_flag = False
-        bucket_full_flag = False
-        describe_current_position()
-
-
-# fill
-def fill_command(subject_index, subject):
-    _ = subject
-    global current_position, command_subjects, bucket_full_flag, pool_flooded_flag
-    if subject_index == 0:
-        error_unknown_object('what?')
-    elif command_subjects[subject_index].item_id == -1:
-        print("that wouldn't hold anything.")
-    elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
-        error_not_here()
-    elif subject_index != 4:
-        print("that wouldn't hold anything.")
-    elif bucket_full_flag:
-        print("it's already full.")
-    elif current_position == 25 and pool_flooded_flag:
-        print("i'd rather stay away from the mercury.")
-    elif current_position != 23 and current_position != 19:
-        print("i don't see any water here.")
-    else:
-        print('your bucket is now full.')
-        bucket_full_flag = True
-
-
-# unlock object
-def unlock_command(subject_index, subject):
-    _ = subject
-    global current_position, items
-    if subject_index == 0:
-        error_unknown_object('what?')
-    elif subject_index != 12 and subject_index != 27:
-        print("i wouldn't know how to unlock one.")
-        # main_command_loop()
-    elif current_position != 0 and current_position != 5 and current_position != 6:
-        error_not_here()
-    elif current_position == 0 and subject_index == 12:
-        unlock_front_door()
-    elif current_position == 5 and subject_index == 27:
-        unlock_vault()
-    elif current_position != 6 or subject_index != 12 or items[16].location != -2:
-        error_not_here()
-    else:
-        print('the trapdoor has no lock')
 
 
 def unlock_vault():
@@ -674,12 +843,6 @@ def unlock_front_door():
         print('the door easily unlocks and swings open.')
         dungeon_unlocked_flag = True
         describe_current_position()
-
-
-# look
-def look_command(subject_index, subject):
-    _, _ = subject_index, subject
-    describe_current_position()
 
 
 def describe_current_position():
@@ -728,166 +891,6 @@ def describe_current_position():
         print('')
 
 
-# go
-def go_command(subject_index, subject):
-    _ = subject
-    global current_position, items
-    if subject_index != 8 and subject_index != 18 and subject_index != 28:
-        error_unknown_object('what?')
-    elif subject_index == 8 and current_position != 48:
-        error_not_here()
-    elif subject_index == 18 and current_position != 2 and current_position != 27:
-        error_not_here()
-    elif subject_index == 28 and current_position != 25:
-        error_not_here()
-    elif subject_index == 8:
-        current_position = 25
-        describe_current_position()
-    elif subject_index == 28 and pool_flooded_flag:
-        print('the pool is full of mercury!')
-    elif subject_index == 28:
-        current_position = 48
-    elif current_position == 27:
-        current_position = 2
-        describe_current_position()
-    elif items[9].location == -1:
-        print('the suits of armor try to stop you,')
-        print('but you fight them off with your sword.')
-        current_position = 27
-        describe_current_position()
-    else:
-        wrap_string('the suits of armor prevent you from going up!')
-
-
-# north
-def north_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, rooms, dungeon_unlocked_flag
-    if current_position == 0 and not dungeon_unlocked_flag:
-        print('the door is locked shut.')
-        return
-    elif rooms[current_position].moves[MOVE_NORTH] == 0:
-        error_no_path()
-        return
-    elif current_position == 0:
-        print('the door slams shut behind you!')
-    current_position = rooms[current_position].moves[MOVE_NORTH]
-    describe_current_position()
-
-
-# south
-def south_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, rooms, fire_burning_flag
-    if current_position == 10 and fire_burning_flag:
-        print('you have burnt to a crisp!')
-        exit()
-
-    if rooms[current_position].moves[MOVE_SOUTH] == 0:
-        error_no_path()
-    else:
-        current_position = rooms[current_position].moves[MOVE_SOUTH]
-        describe_current_position()
-
-
-# east
-def east_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, rooms, snake_charmed_flag, angry_snake_flag
-    if current_position == 4 and not snake_charmed_flag and not angry_snake_flag:
-        print('the snake is about to attack!')
-        angry_snake_flag = True
-    elif current_position == 4 and not snake_charmed_flag:
-        print('the snake bites you!')
-        print('you are dead.')
-        exit()
-
-    if rooms[current_position].moves[MOVE_EAST] == 0:
-        error_no_path()
-    else:
-        current_position = rooms[current_position].moves[MOVE_EAST]
-        describe_current_position()
-
-
-# west
-def west_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, rooms
-    if rooms[current_position].moves[MOVE_WEST] == 0:
-        error_no_path()
-    else:
-        current_position = rooms[current_position].moves[MOVE_WEST]
-        describe_current_position()
-
-
-# score
-def score_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global gathered_treasures
-    print('if you were to quit now,')
-    print('you would have a score of')
-    print(gathered_treasures * 20, 'points.')
-    print('(100 possible)')
-    while True:
-        print('do you indeed wish to quit now? ')
-        input_str = get_input()
-        if input_str[0].lower() == 'y':
-            final_stats()
-        elif input_str[0].lower() == 'n':
-            print('ok')
-            print()
-            break
-
-
-# turn
-def turn_command(subject_index, subject):
-    _ = subject
-    global current_position, items, pool_flooded_flag
-    if subject_index != 7:
-        print("i don't know how to turn such a thing.")
-        describe_current_position()
-    elif current_position != 26:
-        error_not_here()
-    else:
-        wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
-        print('flowing through the pipes.')
-        pool_flooded_flag = not pool_flooded_flag
-        if not pool_flooded_flag and items[7].location == -3:
-            items[7].location = 25
-        elif pool_flooded_flag and items[7].location == 25:
-            items[7].location = -3
-
-
-# jump
-def jump_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, items, escaped_flag, jump_warning_flag
-    if current_position != 27 and current_position != 29 and current_position != 32:
-        print("there's nowhere to jump.")
-        # main_command_loop()
-    else:
-        print('you jump..')
-        if current_position == 27:
-            jump_down_stairs()
-        elif items[14].location == -1:
-            print('there is no way to open the parachute!')
-        elif items[27].location == -1:
-            print('you yank the ripcord and the')
-            print("'chute comes billowing out.")
-            if current_position == 32:
-                current_position = 40
-                describe_current_position()
-            else:
-                print('you land safely')
-                print('congratulations on escaping!')
-                escaped_flag = True
-                final_stats()
-        print('you hit the ground.')
-        print("you have broken your neck!")
-        print("you are dead.")
-        exit()
-
-
 def jump_down_stairs():
     global jump_warning_flag, current_position
     if jump_warning_flag:
@@ -903,44 +906,6 @@ def jump_down_stairs():
         jump_warning_flag = True
         current_position = 2
         describe_current_position()
-
-
-# swim
-def swim_command(subject_index, subject):
-    _, _ = subject_index, subject
-    global current_position, pool_flooded_flag
-    if current_position != 19 and current_position != 25:
-        print("there's nothing here to swim in!")
-    elif current_position == 19:
-        print('the water is only a few inches deep.')
-    elif pool_flooded_flag:
-        print("in mercury?  no way!")
-    else:
-        print('the pool is empty.')
-
-
-# fix
-def fix_command(subject_index, subject):
-    _ = subject
-    global current_position, items, command_subjects
-    if subject_index == 0:
-        error_unknown_object('what')
-    elif subject_index == 7:
-        print("i ain't no plumber!")
-    elif subject_index != 17:
-        print("i wouldn't know how.")
-    elif get_item_location(subject_index) != current_position and get_item_location(subject_index) != -1:
-        error_not_here()
-    elif items[14].location == -2:
-        print("it's already fixed.")
-    elif items[17].location != -1:
-        print("i'll need a ripcord.")
-    else:
-        print("i'm no expert, but i think it'll work.")
-        items[27].location = items[14].location
-        items[14].location = -2
-        command_subjects[17].item_id = 27
-        items[17].location = 0
 
 
 def error_unknown_object(subject):

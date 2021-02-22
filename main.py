@@ -15,7 +15,6 @@ import miserLib
 def main():
     miser = miserLib.Miser()
     welcome_banner()
-    miser.initialize_data()
     miserLib.clear_screen()
     miserLib.describe_current_position()
     miser.main_command_loop()
