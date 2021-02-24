@@ -14,15 +14,15 @@ import miserLib
 
 def main():
     miser = miserLib.Miser()
-    welcome_banner()
     miserLib.clear_screen()
-    miserLib.describe_current_position()
+    welcome_banner()
+    miser.describe_current_position()
     miser.main_command_loop()
 
 
 def welcome_banner():
-    print(f'{miserLib.program_name:>12} by m.j. lansing')
-    print(f'   cursor # {miserLib.cursor_issue}  copyright (c) 1981')
+    print(f'{miserLib.PROGRAM_NAME:>12} by m.j. lansing')
+    print(f'   cursor # {miserLib.CURSOR_ISSUE}  copyright (c) 1981')
     print('*' * 40)
     print("explore the miser's house   (needs 16k)")
     print('\n\n\npress return to begin')
