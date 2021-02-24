@@ -8,6 +8,14 @@ class MiserTest(unittest.TestCase):
         self.assertIsInstance(miser, Miser)
         self.assertEqual(miser.current_position, 0)
 
+    def test_get_inside(self):
+        miser = Miser()
+        miser.handle_command(["get", "mat"])
+        miser.handle_command(["get", "key"])
+        miser.handle_command(["unlock", "door"])
+        miser.handle_command(["north"])
+        self.assertEqual(miser.current_position, 1)
+
 
 def suite():
     """Test Suite"""

@@ -762,7 +762,6 @@ class Miser:
             self.game_over_flag = True
             final_stats()
 
-    # todo fix this death
     def jump_down_stairs(self):
         global jump_warning_flag
         if jump_warning_flag:
@@ -770,7 +769,8 @@ class Miser:
             print("my warning, and as a result")
             print("you have broken your neck!")
             print("you are dead.")
-            exit()
+            self.game_over_flag = True
+            final_stats()
         else:
             print('you have landed down-stairs,')
             print('and narrowly escaped serious')
