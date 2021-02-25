@@ -16,6 +16,22 @@ class MiserTest(unittest.TestCase):
         miser.handle_command(["north"])
         self.assertEqual(miser.current_position, 1)
 
+    def test_get_and_drop_work(self):
+        miser = Miser()
+        mat_index = 2
+        self.assertEqual(miser.get_item_location(mat_index), 0)
+        miser.handle_command(["get", "mat"])
+        self.assertEqual(miser.get_item_location(mat_index), -1)
+        miser.handle_command(["drop", "mat"])
+        self.assertEqual(miser.get_item_location(mat_index), 0)
+
+    def test_exposing_key_works(self):
+        miser = Miser()
+        key_index = 6
+        self.assertEqual(miser.get_item_location(key_index), -2)
+        miser.handle_command(["get", "mat"])
+        self.assertEqual(miser.get_item_location(key_index), 0)
+
 
 def suite():
     """Test Suite"""
