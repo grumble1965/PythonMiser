@@ -22,14 +22,6 @@ rooms = []
 command_subjects = []
 verbs = []
 
-# todo put the flags into a single data structure
-pool_flooded_flag = bucket_full_flag = fire_burning_flag = vault_open_flag = False
-found_vault_flag = dungeon_unlocked_flag = know_combination_flag = False
-gg_flag = escaped_flag = snake_charmed_flag = angry_snake_flag = jump_warning_flag = False
-portal_visible_flag = False
-
-gathered_treasures = 0
-
 # todo make help message class
 help_strings, help_index = [], 0
 
@@ -62,17 +54,30 @@ def get_item_location(subject_idx):
 #
 class Miser:
     def __init__(self):
-        self.game_over_flag = False
+        self.flags = {
+            "game_over": False,
+            "pool_flooded": True,
+            "bucket_full": False,
+            "fire_burning": True,
+            "vault_open": False,
+            "found_vault": False,
+            "dungeon_unlocked": False,
+            "know_combination": False,
+            "organ_playing": False,
+            "escaped": False,
+            "snake_charmed": False,
+            "angry_snake": False,
+            "jump_warning": False,
+            "portal_visible": False
+        }
 
         self.current_position = 0
+        self.gathered_treasures = 0
 
         global rooms
         global items
         global verbs
         global command_subjects
-
-        global pool_flooded_flag, fire_burning_flag
-        pool_flooded_flag = fire_burning_flag = True
 
         global help_strings
         help_strings = ['what?', "i don't understand that"]
@@ -224,7 +229,7 @@ class Miser:
         rooms = temp_list
 
     def main_command_loop(self):
-        while not self.game_over_flag:
+        while not self.flags["game_over"]:
             print()
             input_str = get_input()
             input_str.strip()
@@ -276,7 +281,7 @@ class Miser:
     # get, take object
     def get_take_command(self, subject_index, subject):
         _ = subject
-        global command_subjects, items, gathered_treasures
+        global command_subjects, items
         if subject_index == 0:
             error_unknown_object('what?')
         elif command_subjects[subject_index].item_id == -1:
@@ -290,7 +295,7 @@ class Miser:
             print('ok')
             if (3 < command_subjects[subject_index].item_id < 9) or command_subjects[subject_index].item_id == 19:
                 print('you got a treasure!')
-                gathered_treasures += 1
+                self.gathered_treasures += 1
             if subject_index == 2 and items[20].location == -2:
                 print('you find a door key!')
                 items[20].location = 0
@@ -298,12 +303,12 @@ class Miser:
     # move, slide, push
     def move_slide_push_command(self, subject_index, subject):
         _ = subject
-        global rooms, command_subjects, items, found_vault_flag
+        global rooms, command_subjects, items
         if subject_index == 0:
             error_unknown_object('move what?')
         elif subject_index == 13 and self.current_position == 5 and rooms[5].moves[MOVE_EAST] == 0:
             print('behind the cabinet is a vault!')
-            found_vault_flag = True
+            self.flags["found_vault"] = True
             self.describe_current_position()
         elif command_subjects[subject_index].item_id == -1:
             print('that item stays put.')
@@ -342,10 +347,9 @@ class Miser:
             print("i don't know how to open that.")
 
     def open_door(self):
-        global dungeon_unlocked_flag
-        if self.current_position == 0 and not dungeon_unlocked_flag:
+        if self.current_position == 0 and not self.flags["dungeon_unlocked"]:
             print('sorry, the door is locked.')
-        elif self.current_position == 0 and dungeon_unlocked_flag:
+        elif self.current_position == 0 and self.flags["dungeon_unlocked"]:
             print("it's already open.")
         elif self.current_position != 6:
             error_not_here()
@@ -369,19 +373,18 @@ class Miser:
             print("it won't open.")
 
     def open_vault(self):
-        global found_vault_flag, vault_open_flag
-        if self.current_position != 5 or not found_vault_flag:
+        if self.current_position != 5 or not self.flags["found_vault"]:
             error_not_here()
-        elif vault_open_flag:
+        elif self.flags["vault_open"]:
             print("it's already open.")
         else:
             print("i can't, it's locked.")
 
     def open_organ(self):
-        global gg_flag, items
+        global items
         if self.current_position != 21:
             error_not_here()
-        elif not gg_flag:
+        elif not self.flags["organ_playing"]:
             print("it's stuck shut.")
         elif items[24].location == -2:
             print("it's already open.")
@@ -403,7 +406,6 @@ class Miser:
     # read
     def read_command(self, subject_index, subject):
         _ = subject
-        global know_combination_flag
         if subject_index == 0:
             error_unknown_object('read what?')
         elif command_subjects[subject_index].item_id > -1 \
@@ -419,20 +421,19 @@ class Miser:
         else:
             print("it says, '12-35-6'.")
             print('hmm.. looks like a combination.')
-            know_combination_flag = True
+            self.flags["know_combination"] = True
 
     # inventory
-    @staticmethod
-    def inventory_command(subject_index, subject):
+    def inventory_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global items, bucket_full_flag
+        global items
         print('you are carrying the following:')
         carrying_something = False
         for x in range(1, len(items)):
             if items[x].location == -1:
                 print(items[x].text)
                 carrying_something = True
-            if x == 1 and bucket_full_flag and items[1].location == -1:
+            if x == 1 and self.flags["bucket_full"] and items[1].location == -1:
                 print('  the bucket is full of water.')
             if x == 14 and items[14].location == -1:
                 print('   (better fix it)')
@@ -448,13 +449,13 @@ class Miser:
             print('ok')
         else:
             clear_screen()
-            final_stats()
-            self.game_over_flag = True
+            self.final_stats()
+            self.flags["game_over"] = True
 
     # drop
     def drop_command(self, subject_index, subject):
         _ = subject
-        global items, command_subjects, rooms, gg_flag
+        global items, command_subjects, rooms
         if get_item_location(subject_index) != -1:
             print("you aren't carrying it!")
             return
@@ -471,7 +472,7 @@ class Miser:
             wrap_string('even before it hits the ground, the cross fades away!')
             print('the tablet has disintegrated.')
             print('you hear music from the organ.')
-            gg_flag = True
+            self.flags["organ_playing"] = True
             items[11].location = -2
             rooms[22].text = 'chapel'
             items[24].text = 'closed organ playing music in the corner'
@@ -496,51 +497,51 @@ class Miser:
             print('nothing happens.')
 
     def say_victory(self):
-        global items, rooms, portal_visible_flag
-        if self.current_position != 8 or portal_visible_flag:
+        global items, rooms
+        if self.current_position != 8 or self.flags["portal_visible"]:
             print('nothing happens.')
         else:
             print('a portal has opened in the north wall!!')
-            portal_visible_flag = True
+            self.flags["portal_visible"] = True
             rooms[8].moves[MOVE_NORTH] = 17
             items[18].location = 8
 
     def say_ritnew(self):
-        global items, snake_charmed_flag
-        if self.current_position != 4 or snake_charmed_flag:
+        global items
+        if self.current_position != 4 or self.flags["snake_charmed"]:
             print('nothing happens.')
         else:
             wrap_string('the snake is charmed by the very utterance of your words.')
-            snake_charmed_flag = True
+            self.flags["snake_charmed"] = True
             items[2].location = -2
             items[3].location = 4
 
     # pour
     def pour_command(self, subject_index, subject):
         _ = subject
-        global items, bucket_full_flag, fire_burning_flag
+        global items
         if subject_index != 4:
             print("i wouldn't know how.")
         elif items[1].location != -1 and items[1].location != self.current_position:
             error_not_here()
-        elif not bucket_full_flag:
+        elif not self.flags["bucket_full"]:
             print('the bucket is already empty')
         elif self.current_position == 19:
             print('ok')
-        elif self.current_position != 10 or not fire_burning_flag:
+        elif self.current_position != 10 or not self.flags["fire_burning"]:
             print('the water disappears quickly.')
-            bucket_full_flag = False
+            self.flags["bucket_full"] = False
         else:
             print('congratulations! you have vanquished')
             print('the flames!')
-            fire_burning_flag = False
-            bucket_full_flag = False
+            self.flags["fire_burning"] = False
+            self.flags["bucket_full"] = False
             self.describe_current_position()
 
     # fill
     def fill_command(self, subject_index, subject):
         _ = subject
-        global command_subjects, bucket_full_flag, pool_flooded_flag
+        global command_subjects
         if subject_index == 0:
             error_unknown_object('what?')
         elif command_subjects[subject_index].item_id == -1:
@@ -549,15 +550,15 @@ class Miser:
             error_not_here()
         elif subject_index != 4:
             print("that wouldn't hold anything.")
-        elif bucket_full_flag:
+        elif self.flags["bucket_full"]:
             print("it's already full.")
-        elif self.current_position == 25 and pool_flooded_flag:
+        elif self.current_position == 25 and self.flags["pool_flooded"]:
             print("i'd rather stay away from the mercury.")
         elif self.current_position != 23 and self.current_position != 19:
             print("i don't see any water here.")
         else:
             print('your bucket is now full.')
-            bucket_full_flag = True
+            self.flags["bucket_full"] = True
 
     # unlock object
     def unlock_command(self, subject_index, subject):
@@ -579,29 +580,29 @@ class Miser:
             print('the trapdoor has no lock')
 
     def unlock_vault(self):
-        global rooms, vault_open_flag, found_vault_flag, know_combination_flag
-        if vault_open_flag:
+        global rooms
+        if self.flags["vault_open"]:
             print("it's already open.")
-        elif not found_vault_flag:
+        elif not self.flags["found_vault"]:
             error_not_here()
-        elif not know_combination_flag:
+        elif not self.flags["know_combination"]:
             print('i don''t know the combination.')
         else:
             print("ok, let's see.  12..35..6..")
             print('<click!> the door swings open.')
-            vault_open_flag = True
+            self.flags["vault_open"] = True
             rooms[5].moves[MOVE_EAST] = 46
             self.describe_current_position()
 
     def unlock_front_door(self):
-        global items, dungeon_unlocked_flag
-        if dungeon_unlocked_flag:
+        global items
+        if self.flags["dungeon_unlocked"]:
             print("it's already unlocked.")
         elif items[20].location != -1:
             print('i need a key.')
         else:
             print('the door easily unlocks and swings open.')
-            dungeon_unlocked_flag = True
+            self.flags["dungeon_unlocked"] = True
             self.describe_current_position()
 
     # look
@@ -624,7 +625,7 @@ class Miser:
         elif subject_index == 8:
             self.current_position = 25
             self.describe_current_position()
-        elif subject_index == 28 and pool_flooded_flag:
+        elif subject_index == 28 and self.flags["pool_flooded"]:
             print('the pool is full of mercury!')
         elif subject_index == 28:
             self.current_position = 48
@@ -642,8 +643,8 @@ class Miser:
     # north
     def north_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global rooms, dungeon_unlocked_flag
-        if self.current_position == 0 and not dungeon_unlocked_flag:
+        global rooms
+        if self.current_position == 0 and not self.flags["dungeon_unlocked"]:
             print('the door is locked shut.')
             return
         elif rooms[self.current_position].moves[MOVE_NORTH] == 0:
@@ -657,11 +658,11 @@ class Miser:
     # south
     def south_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global rooms, fire_burning_flag
-        if self.current_position == 10 and fire_burning_flag:
+        global rooms
+        if self.current_position == 10 and self.flags["fire_burning"]:
             print('you have burnt to a crisp!')
-            self.game_over_flag = True
-            final_stats()
+            self.flags["game_over"] = True
+            self.final_stats()
         elif rooms[self.current_position].moves[MOVE_SOUTH] == 0:
             error_no_path()
         else:
@@ -671,15 +672,15 @@ class Miser:
     # east
     def east_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global rooms, snake_charmed_flag, angry_snake_flag
-        if self.current_position == 4 and not snake_charmed_flag and not angry_snake_flag:
+        global rooms
+        if self.current_position == 4 and not self.flags["snake_charmed"] and not self.flags["angry_snake"]:
             print('the snake is about to attack!')
-            angry_snake_flag = True
-        elif self.current_position == 4 and not snake_charmed_flag:
+            self.flags["angry_snake"] = True
+        elif self.current_position == 4 and not self.flags["snake_charmed"]:
             print('the snake bites you!')
             print('you are dead.')
-            self.game_over_flag = True
-            final_stats()
+            self.flags["game_over"] = True
+            self.final_stats()
         elif rooms[self.current_position].moves[MOVE_EAST] == 0:
             error_no_path()
         else:
@@ -699,17 +700,16 @@ class Miser:
     # score
     def score_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global gathered_treasures
         print('if you were to quit now,')
         print('you would have a score of')
-        print(gathered_treasures * 20, 'points.')
+        print(self.gathered_treasures * 20, 'points.')
         print('(100 possible)')
-        while True:
+        while not self.flags["game_over"]:
             print('do you indeed wish to quit now? ')
             input_str = get_input()
             if input_str[0].lower() == 'y':
-                self.game_over_flag = True
-                final_stats()
+                self.flags["game_over"] = True
+                self.final_stats()
             elif input_str[0].lower() == 'n':
                 print('ok')
                 print()
@@ -718,7 +718,7 @@ class Miser:
     # turn
     def turn_command(self, subject_index, subject):
         _ = subject
-        global items, pool_flooded_flag
+        global items
         if subject_index != 7:
             print("i don't know how to turn such a thing.")
             self.describe_current_position()
@@ -727,16 +727,16 @@ class Miser:
         else:
             wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
             print('flowing through the pipes.')
-            pool_flooded_flag = not pool_flooded_flag
-            if not pool_flooded_flag and items[7].location == -3:
+            self.flags["pool_flooded"] = not self.flags["pool_flooded"]
+            if not self.flags["pool_flooded"] and items[7].location == -3:
                 items[7].location = 25
-            elif pool_flooded_flag and items[7].location == 25:
+            elif self.flags["pool_flooded"] and items[7].location == 25:
                 items[7].location = -3
 
     # jump
     def jump_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global items, escaped_flag, jump_warning_flag
+        global items
         if self.current_position != 27 and self.current_position != 29 and self.current_position != 32:
             print("there's nowhere to jump.")
         else:
@@ -754,40 +754,38 @@ class Miser:
                 else:
                     print('you land safely')
                     print('congratulations on escaping!')
-                    escaped_flag = True
-                    final_stats()
+                    self.flags["escaped"] = True
+                    self.final_stats()
             print('you hit the ground.')
             print("you have broken your neck!")
             print("you are dead.")
-            self.game_over_flag = True
-            final_stats()
+            self.flags["game_over"] = True
+            self.final_stats()
 
     def jump_down_stairs(self):
-        global jump_warning_flag
-        if jump_warning_flag:
+        if self.flags["jump_warning"]:
             print("now you've done it.  you ignored")
             print("my warning, and as a result")
             print("you have broken your neck!")
             print("you are dead.")
-            self.game_over_flag = True
-            final_stats()
+            self.flags["game_over"] = True
+            self.final_stats()
         else:
             print('you have landed down-stairs,')
             print('and narrowly escaped serious')
             print("injury.  please don't try it again.")
-            jump_warning_flag = True
+            self.flags["jump_warning"] = True
             self.current_position = 2
             self.describe_current_position()
 
     # swim
     def swim_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        global pool_flooded_flag
         if self.current_position != 19 and self.current_position != 25:
             print("there's nothing here to swim in!")
         elif self.current_position == 19:
             print('the water is only a few inches deep.')
-        elif pool_flooded_flag:
+        elif self.flags["pool_flooded"]:
             print("in mercury?  no way!")
         else:
             print('the pool is empty.')
@@ -817,21 +815,20 @@ class Miser:
 
     def describe_current_position(self):
         global rooms, items
-        global pool_flooded_flag, fire_burning_flag, found_vault_flag, vault_open_flag, dungeon_unlocked_flag
         wrap_string(f'you are in the {rooms[self.current_position].text}')
         for x in range(1, len(items)):
             if items[x].location == self.current_position:
                 wrap_string(f'there is a {items[x].text} here')
-            if x == 1 and bucket_full_flag and items[1].location == self.current_position:
+            if x == 1 and self.flags["bucket_full"] and items[1].location == self.current_position:
                 print("the bucket is full of water")
         if self.current_position == 25:
-            if pool_flooded_flag:
+            if self.flags["pool_flooded"]:
                 print('the pool is full of liquid mercury')
             else:
                 print("the pool's empty")
                 if items[7].location == 48:
                     print('i see something shiny in the pool!')
-        if self.current_position == 10 and fire_burning_flag:
+        if self.current_position == 10 and self.flags["fire_burning"]:
             print('there is a hot fire on the south wall!')
             print("if I go that way I'll burn to death!")
         if self.current_position == 16:
@@ -840,13 +837,13 @@ class Miser:
             print('there is a valve on one of the pipes.')
         if self.current_position == 23:
             print('there is a leaky faucet nearby.')
-        if self.current_position == 10 and not fire_burning_flag:
+        if self.current_position == 10 and not self.flags["fire_burning"]:
             print('there is evidence of a recent fire here.')
-        if self.current_position == 5 and found_vault_flag:
+        if self.current_position == 5 and self.flags["found_vault"]:
             print('there is a vault in the east wall.')
-        if self.current_position == 5 and vault_open_flag:
+        if self.current_position == 5 and self.flags["vault_open"]:
             print('the vault is open')
-        if self.current_position == 0 and dungeon_unlocked_flag:
+        if self.current_position == 0 and self.flags["dungeon_unlocked"]:
             print('an open door leads north.')
         if self.current_position != 48:
             print('obvious exits:')
@@ -859,6 +856,32 @@ class Miser:
             if rooms[self.current_position].moves[MOVE_WEST] > 0:
                 print('w ', end='')
             print('')
+
+    def final_stats(self):
+        print('you accumulated', self.gathered_treasures, 'treasures,')
+        print('for a score of', self.gathered_treasures * 20, 'points.')
+        print('(100 possible)')
+        if not self.flags["escaped"]:
+            print('however, you did not escape.')
+        print('this puts you in a class of:')
+        if self.flags["escaped"]:
+            self.gathered_treasures += 1
+        if self.gathered_treasures == 0:
+            print('<beginner adventurer>')
+        elif self.gathered_treasures == 1:
+            print('<amateur adventurer>')
+        elif self.gathered_treasures == 2:
+            print('<journeyman adventurer>')
+        elif self.gathered_treasures == 3:
+            print('<experienced adventurer>')
+        elif self.gathered_treasures == 4:
+            print('<professional adventurer>')
+        elif self.gathered_treasures == 5:
+            print('<master adventurer>')
+        else:
+            print('<grandmaster adventurer>')
+        if self.gathered_treasures < 6:
+            print('better luck next time!')
 
 
 #
@@ -895,34 +918,6 @@ class VerbClass:
     def __init__(self, text, handler):
         self.text = text
         self.handler = handler
-
-
-def final_stats():
-    global gathered_treasures, escaped_flag
-    print('you accumulated', gathered_treasures, 'treasures,')
-    print('for a score of', gathered_treasures * 20, 'points.')
-    print('(100 possible)')
-    if not escaped_flag:
-        print('however, you did not escape.')
-    print('this puts you in a class of:')
-    if escaped_flag:
-        gathered_treasures += 1
-    if gathered_treasures == 0:
-        print('<beginner adventurer>')
-    elif gathered_treasures == 1:
-        print('<amateur adventurer>')
-    elif gathered_treasures == 2:
-        print('<journeyman adventurer>')
-    elif gathered_treasures == 3:
-        print('<experienced adventurer>')
-    elif gathered_treasures == 4:
-        print('<professional adventurer>')
-    elif gathered_treasures == 5:
-        print('<master adventurer>')
-    else:
-        print('<grandmaster adventurer>')
-    if gathered_treasures < 6:
-        print('better luck next time!')
 
 
 def error_unknown_object(subject):
