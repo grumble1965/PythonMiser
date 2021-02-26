@@ -12,22 +12,34 @@
 import miserLib
 
 
+class GameUI(miserLib.IUserInterface):
+    @staticmethod
+    def mp(*args, sep=' ', end='\n'):
+        if len(args) == 0:
+            print(end=end)
+        else:
+            for arg in args:
+                print(arg, end=sep)
+            print(end=end)
+
+
 def main():
-    miser = miserLib.Miser()
+    ui = GameUI()
+    miser = miserLib.Miser(ui)
     miserLib.clear_screen()
-    welcome_banner()
+    welcome_banner(ui)
     miser.describe_current_position()
     miser.main_command_loop()
 
 
-def welcome_banner():
-    print(f'{miserLib.PROGRAM_NAME:>12} by m.j. lansing')
-    print(f'   cursor # {miserLib.CURSOR_ISSUE}  copyright (c) 1981')
-    print('*' * 40)
-    print("explore the miser's house   (needs 16k)")
-    print('\n\n\npress return to begin')
+def welcome_banner(ui):
+    ui.mp(f'{miserLib.PROGRAM_NAME:>12} by m.j. lansing')
+    ui.mp(f'   cursor # {miserLib.CURSOR_ISSUE}  copyright (c) 1981')
+    ui.mp('*' * 40)
+    ui.mp("explore the miser's house   (needs 16k)")
+    ui.mp('\n\n\npress return to begin')
     miserLib.wait_for_keypress()
-    print('\n\none moment please...')
+    ui.mp('\n\none moment please...')
 
 
 # Press the green button in the gutter to run the script.

@@ -42,7 +42,8 @@ def delay():
 # Class for the overall Miser game
 #
 class Miser:
-    def __init__(self):
+    def __init__(self, ui):
+        self.ui = ui
         self.flags = {
             "game_over": False,
             "pool_flooded": True,
@@ -215,12 +216,12 @@ class Miser:
 
     def main_command_loop(self):
         while not self.flags["game_over"]:
-            print()
+            self.ui.mp()
             input_str = get_input()
             input_str.strip()
             parsed_words = input_str.split()
             if len(parsed_words) < 1 or len(parsed_words) > 2:
-                print('please type a one or two word command')
+                self.ui.mp('please type a one or two word command')
             else:
                 self.handle_command(parsed_words)
 
@@ -267,19 +268,19 @@ class Miser:
         if subject_index == 0:
             error_unknown_object('what?')
         elif self.subjects[subject_index].item_id == -1:
-            print('i am unable to do that.')
+            self.ui.mp('i am unable to do that.')
         elif self.get_item_location(subject_index) == -1:
-            print("you're already carrying it")
+            self.ui.mp("you're already carrying it")
         elif self.get_item_location(subject_index) != self.current_position:
             error_not_here()
         else:
             self.items[self.subjects[subject_index].item_id].location = -1
-            print('ok')
+            self.ui.mp('ok')
             if (3 < self.subjects[subject_index].item_id < 9) or self.subjects[subject_index].item_id == 19:
-                print('you got a treasure!')
+                self.ui.mp('you got a treasure!')
                 self.gathered_treasures += 1
             if subject_index == 2 and self.items[20].location == -2:
-                print('you find a door key!')
+                self.ui.mp('you find a door key!')
                 self.items[20].location = 0
 
     # move, slide, push
@@ -288,23 +289,23 @@ class Miser:
         if subject_index == 0:
             error_unknown_object('move what?')
         elif subject_index == 13 and self.current_position == 5 and self.rooms[5].moves[Move.EAST] == 0:
-            print('behind the cabinet is a vault!')
+            self.ui.mp('behind the cabinet is a vault!')
             self.flags["found_vault"] = True
             self.describe_current_position()
         elif self.subjects[subject_index].item_id == -1:
-            print('that item stays put.')
+            self.ui.mp('that item stays put.')
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         elif subject_index == 2 and self.items[20].location == -2:
-            print('you find a door key!')
+            self.ui.mp('you find a door key!')
             self.items[20].location = 0
         elif subject_index == 10 and self.items[16].location == -2:
-            print('you find a trap door!')
+            self.ui.mp('you find a trap door!')
             self.items[16].location = 6
             self.describe_current_position()
         else:
-            print('moving it reveals nothing.')
+            self.ui.mp('moving it reveals nothing.')
 
     # open
     def open_command(self, subject_index, subject):
@@ -314,7 +315,7 @@ class Miser:
         elif subject_index == 11:
             self.open_book(subject_index)
         elif subject_index == 7:
-            print('try turning it.')
+            self.ui.mp('try turning it.')
         elif subject_index == 12:
             self.open_door()
         elif subject_index == 13:
@@ -326,17 +327,17 @@ class Miser:
         elif subject_index == 16:
             self.open_organ()
         else:
-            print("i don't know how to open that.")
+            self.ui.mp("i don't know how to open that.")
 
     def open_door(self):
         if self.current_position == 0 and not self.flags["dungeon_unlocked"]:
-            print('sorry, the door is locked.')
+            self.ui.mp('sorry, the door is locked.')
         elif self.current_position == 0 and self.flags["dungeon_unlocked"]:
-            print("it's already open.")
+            self.ui.mp("it's already open.")
         elif self.current_position != 6:
             error_not_here()
         else:
-            wrap_string('you open the door. you lean over to peer in, and you fall in!')
+            self.wrap_string('you open the door. you lean over to peer in, and you fall in!', text_wrap_width)
             self.current_position = 47
             self.describe_current_position()
 
@@ -344,34 +345,34 @@ class Miser:
         if self.items[26].location != self.current_position:
             error_not_here()
         else:
-            print('the cabinet is empty and dusty.')
-            wrap_string("scribbled in the dust on one shelf are the words, 'behind me'.")
+            self.ui.mp('the cabinet is empty and dusty.')
+            self.wrap_string("scribbled in the dust on one shelf are the words, 'behind me'.", text_wrap_width)
 
     def open_bag(self, subject_index):
         if self.get_item_location(subject_index) != self.current_position\
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         else:
-            print('the bag is knotted securely.')
-            print("it won't open.")
+            self.ui.mp('the bag is knotted securely.')
+            self.ui.mp("it won't open.")
 
     def open_vault(self):
         if self.current_position != 5 or not self.flags["found_vault"]:
             error_not_here()
         elif self.flags["vault_open"]:
-            print("it's already open.")
+            self.ui.mp("it's already open.")
         else:
-            print("i can't, it's locked.")
+            self.ui.mp("i can't, it's locked.")
 
     def open_organ(self):
         if self.current_position != 21:
             error_not_here()
         elif not self.flags["organ_playing"]:
-            print("it's stuck shut.")
+            self.ui.mp("it's stuck shut.")
         elif self.items[24].location == -2:
-            print("it's already open.")
+            self.ui.mp("it's already open.")
         else:
-            print('as you open it, several objects suddenly appear!')
+            self.ui.mp('as you open it, several objects suddenly appear!')
             self.items[24].location = -2
             self.items[25].location = 21
             self.items[19].location = 21
@@ -383,8 +384,8 @@ class Miser:
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         else:
-            wrap_string("scrawled in blood on the inside front cover is the message,")
-            print("''victory' is a prize-winning word'.")
+            self.wrap_string("scrawled in blood on the inside front cover is the message,", text_wrap_width)
+            self.ui.mp("''victory' is a prize-winning word'.")
 
     # read
     def read_command(self, subject_index, subject):
@@ -396,39 +397,39 @@ class Miser:
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         elif self.subjects[subject_index].item_id == -1:
-            print("there's nothing written on that.")
+            self.ui.mp("there's nothing written on that.")
         elif subject_index != 3 and subject_index != 11:
-            print("there's nothing written on that.")
+            self.ui.mp("there's nothing written on that.")
         elif subject_index == 11:
-            print('the front cover is inscribed in greek.')
+            self.ui.mp('the front cover is inscribed in greek.')
         else:
-            print("it says, '12-35-6'.")
-            print('hmm.. looks like a combination.')
+            self.ui.mp("it says, '12-35-6'.")
+            self.ui.mp('hmm.. looks like a combination.')
             self.flags["know_combination"] = True
 
     # inventory
     def inventory_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        print('you are carrying the following:')
+        self.ui.mp('you are carrying the following:')
         carrying_something = False
         for x in range(1, len(self.items)):
             if self.items[x].location == -1:
-                print(self.items[x].text)
+                self.ui.mp(self.items[x].text)
                 carrying_something = True
             if x == 1 and self.flags["bucket_full"] and self.items[1].location == -1:
-                print('  the bucket is full of water.')
+                self.ui.mp('  the bucket is full of water.')
             if x == 14 and self.items[14].location == -1:
-                print('   (better fix it)')
+                self.ui.mp('   (better fix it)')
         if not carrying_something:
-            print('nothing at all.')
+            self.ui.mp('nothing at all.')
 
     # quit
     def quit_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        print('do you indeed wish to quit now?')
+        self.ui.mp('do you indeed wish to quit now?')
         input_str = get_input()
         if input_str[0].lower() != 'y':
-            print('ok')
+            self.ui.mp('ok')
         else:
             clear_screen()
             self.final_stats()
@@ -438,58 +439,58 @@ class Miser:
     def drop_command(self, subject_index, subject):
         _ = subject
         if self.get_item_location(subject_index) != -1:
-            print("you aren't carrying it!")
+            self.ui.mp("you aren't carrying it!")
             return
 
         x = self.subjects[subject_index].item_id
         if (3 < x < 9) or x == 19:
-            print("don't drop *treasures*!")
+            self.ui.mp("don't drop *treasures*!")
         elif self.current_position == 19 and subject_index == 19:
-            wrap_string('as the penny sinks below the surface of the pool, a fleeting image of')
-            print('a chapel with dancers appears.')
+            self.wrap_string('as the penny sinks below the surface of the pool, a fleeting image of', text_wrap_width)
+            self.ui.mp('a chapel with dancers appears.')
             self.rooms[21].moves[Move.EAST] = 22
             self.items[12].location = -2
         elif self.current_position == 22 and subject_index == 20:
-            wrap_string('even before it hits the ground, the cross fades away!')
-            print('the tablet has disintegrated.')
-            print('you hear music from the organ.')
+            self.wrap_string('even before it hits the ground, the cross fades away!', text_wrap_width)
+            self.ui.mp('the tablet has disintegrated.')
+            self.ui.mp('you hear music from the organ.')
             self.flags["organ_playing"] = True
             self.items[11].location = -2
             self.rooms[22].text = 'chapel'
             self.items[24].text = 'closed organ playing music in the corner'
         else:
             self.items[self.subjects[subject_index].item_id].location = self.current_position
-            print('ok')
+            self.ui.mp('ok')
 
     # say
     def say_command(self, subject_index, word):
         if subject_index == 0:
-            print('say what???')
+            self.ui.mp('say what???')
         elif subject_index == 14:
             self.say_ritnew()
         elif subject_index == 15:
             self.say_victory()
         elif subject_index > 28:
-            print("a hollow voice says, 'wrong adventure'.")
+            self.ui.mp("a hollow voice says, 'wrong adventure'.")
         else:
-            print('okay, "', word, '".')
+            self.ui.mp('okay, "', word, '".')
             delay()
-            print('nothing happens.')
+            self.ui.mp('nothing happens.')
 
     def say_victory(self):
         if self.current_position != 8 or self.flags["portal_visible"]:
-            print('nothing happens.')
+            self.ui.mp('nothing happens.')
         else:
-            print('a portal has opened in the north wall!!')
+            self.ui.mp('a portal has opened in the north wall!!')
             self.flags["portal_visible"] = True
             self.rooms[8].moves[Move.NORTH] = 17
             self.items[18].location = 8
 
     def say_ritnew(self):
         if self.current_position != 4 or self.flags["snake_charmed"]:
-            print('nothing happens.')
+            self.ui.mp('nothing happens.')
         else:
-            wrap_string('the snake is charmed by the very utterance of your words.')
+            self.wrap_string('the snake is charmed by the very utterance of your words.', text_wrap_width)
             self.flags["snake_charmed"] = True
             self.items[2].location = -2
             self.items[3].location = 4
@@ -498,19 +499,19 @@ class Miser:
     def pour_command(self, subject_index, subject):
         _ = subject
         if subject_index != 4:
-            print("i wouldn't know how.")
+            self.ui.mp("i wouldn't know how.")
         elif self.items[1].location != -1 and self.items[1].location != self.current_position:
             error_not_here()
         elif not self.flags["bucket_full"]:
-            print('the bucket is already empty')
+            self.ui.mp('the bucket is already empty')
         elif self.current_position == 19:
-            print('ok')
+            self.ui.mp('ok')
         elif self.current_position != 10 or not self.flags["fire_burning"]:
-            print('the water disappears quickly.')
+            self.ui.mp('the water disappears quickly.')
             self.flags["bucket_full"] = False
         else:
-            print('congratulations! you have vanquished')
-            print('the flames!')
+            self.ui.mp('congratulations! you have vanquished')
+            self.ui.mp('the flames!')
             self.flags["fire_burning"] = False
             self.flags["bucket_full"] = False
             self.describe_current_position()
@@ -521,20 +522,20 @@ class Miser:
         if subject_index == 0:
             error_unknown_object('what?')
         elif self.subjects[subject_index].item_id == -1:
-            print("that wouldn't hold anything.")
+            self.ui.mp("that wouldn't hold anything.")
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         elif subject_index != 4:
-            print("that wouldn't hold anything.")
+            self.ui.mp("that wouldn't hold anything.")
         elif self.flags["bucket_full"]:
-            print("it's already full.")
+            self.ui.mp("it's already full.")
         elif self.current_position == 25 and self.flags["pool_flooded"]:
-            print("i'd rather stay away from the mercury.")
+            self.ui.mp("i'd rather stay away from the mercury.")
         elif self.current_position != 23 and self.current_position != 19:
-            print("i don't see any water here.")
+            self.ui.mp("i don't see any water here.")
         else:
-            print('your bucket is now full.')
+            self.ui.mp('your bucket is now full.')
             self.flags["bucket_full"] = True
 
     # unlock object
@@ -543,7 +544,7 @@ class Miser:
         if subject_index == 0:
             error_unknown_object('what?')
         elif subject_index != 12 and subject_index != 27:
-            print("i wouldn't know how to unlock one.")
+            self.ui.mp("i wouldn't know how to unlock one.")
         elif self.current_position != 0 and self.current_position != 5 and self.current_position != 6:
             error_not_here()
         elif self.current_position == 0 and subject_index == 12:
@@ -553,29 +554,29 @@ class Miser:
         elif self.current_position != 6 or subject_index != 12 or self.items[16].location != -2:
             error_not_here()
         else:
-            print('the trapdoor has no lock')
+            self.ui.mp('the trapdoor has no lock')
 
     def unlock_vault(self):
         if self.flags["vault_open"]:
-            print("it's already open.")
+            self.ui.mp("it's already open.")
         elif not self.flags["found_vault"]:
             error_not_here()
         elif not self.flags["know_combination"]:
-            print('i don''t know the combination.')
+            self.ui.mp('i don''t know the combination.')
         else:
-            print("ok, let's see.  12..35..6..")
-            print('<click!> the door swings open.')
+            self.ui.mp("ok, let's see.  12..35..6..")
+            self.ui.mp('<click!> the door swings open.')
             self.flags["vault_open"] = True
             self.rooms[5].moves[Move.EAST] = 46
             self.describe_current_position()
 
     def unlock_front_door(self):
         if self.flags["dungeon_unlocked"]:
-            print("it's already unlocked.")
+            self.ui.mp("it's already unlocked.")
         elif self.items[20].location != -1:
-            print('i need a key.')
+            self.ui.mp('i need a key.')
         else:
-            print('the door easily unlocks and swings open.')
+            self.ui.mp('the door easily unlocks and swings open.')
             self.flags["dungeon_unlocked"] = True
             self.describe_current_position()
 
@@ -599,31 +600,31 @@ class Miser:
             self.current_position = 25
             self.describe_current_position()
         elif subject_index == 28 and self.flags["pool_flooded"]:
-            print('the pool is full of mercury!')
+            self.ui.mp('the pool is full of mercury!')
         elif subject_index == 28:
             self.current_position = 48
         elif self.current_position == 27:
             self.current_position = 2
             self.describe_current_position()
         elif self.items[9].location == -1:
-            print('the suits of armor try to stop you,')
-            print('but you fight them off with your sword.')
+            self.ui.mp('the suits of armor try to stop you,')
+            self.ui.mp('but you fight them off with your sword.')
             self.current_position = 27
             self.describe_current_position()
         else:
-            wrap_string('the suits of armor prevent you from going up!')
+            self.wrap_string('the suits of armor prevent you from going up!', text_wrap_width)
 
     # north
     def north_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.current_position == 0 and not self.flags["dungeon_unlocked"]:
-            print('the door is locked shut.')
+            self.ui.mp('the door is locked shut.')
             return
         elif self.rooms[self.current_position].moves[Move.NORTH] == 0:
             error_no_path()
             return
         elif self.current_position == 0:
-            print('the door slams shut behind you!')
+            self.ui.mp('the door slams shut behind you!')
         self.current_position = self.rooms[self.current_position].moves[Move.NORTH]
         self.describe_current_position()
 
@@ -631,7 +632,7 @@ class Miser:
     def south_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.current_position == 10 and self.flags["fire_burning"]:
-            print('you have burnt to a crisp!')
+            self.ui.mp('you have burnt to a crisp!')
             self.flags["game_over"] = True
             self.final_stats()
         elif self.rooms[self.current_position].moves[Move.SOUTH] == 0:
@@ -644,11 +645,11 @@ class Miser:
     def east_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.current_position == 4 and not self.flags["snake_charmed"] and not self.flags["angry_snake"]:
-            print('the snake is about to attack!')
+            self.ui.mp('the snake is about to attack!')
             self.flags["angry_snake"] = True
         elif self.current_position == 4 and not self.flags["snake_charmed"]:
-            print('the snake bites you!')
-            print('you are dead.')
+            self.ui.mp('the snake bites you!')
+            self.ui.mp('you are dead.')
             self.flags["game_over"] = True
             self.final_stats()
         elif self.rooms[self.current_position].moves[Move.EAST] == 0:
@@ -669,32 +670,33 @@ class Miser:
     # score
     def score_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        print('if you were to quit now,')
-        print('you would have a score of')
-        print(self.gathered_treasures * 20, 'points.')
-        print('(100 possible)')
+        self.ui.mp('if you were to quit now,')
+        self.ui.mp('you would have a score of')
+        self.ui.mp(self.gathered_treasures * 20, 'points.')
+        self.ui.mp('(100 possible)')
         while not self.flags["game_over"]:
-            print('do you indeed wish to quit now? ')
+            self.ui.mp('do you indeed wish to quit now? ')
             input_str = get_input()
             if input_str[0].lower() == 'y':
                 self.flags["game_over"] = True
                 self.final_stats()
             elif input_str[0].lower() == 'n':
-                print('ok')
-                print()
+                self.ui.mp('ok')
+                self.ui.mp()
                 break
 
     # turn
     def turn_command(self, subject_index, subject):
         _ = subject
         if subject_index != 7:
-            print("i don't know how to turn such a thing.")
+            self.ui.mp("i don't know how to turn such a thing.")
             self.describe_current_position()
         elif self.current_position != 26:
             error_not_here()
         else:
-            wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
-            print('flowing through the pipes.')
+            self.wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid',
+                             text_wrap_width)
+            self.ui.mp('flowing through the pipes.')
             self.flags["pool_flooded"] = not self.flags["pool_flooded"]
             if not self.flags["pool_flooded"] and self.items[7].location == -3:
                 self.items[7].location = 25
@@ -705,42 +707,42 @@ class Miser:
     def jump_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.current_position != 27 and self.current_position != 29 and self.current_position != 32:
-            print("there's nowhere to jump.")
+            self.ui.mp("there's nowhere to jump.")
         else:
-            print('you jump..')
+            self.ui.mp('you jump..')
             if self.current_position == 27:
                 self.jump_down_stairs()
             elif self.items[14].location == -1:
-                print('there is no way to open the parachute!')
+                self.ui.mp('there is no way to open the parachute!')
             elif self.items[27].location == -1:
-                print('you yank the ripcord and the')
-                print("'chute comes billowing out.")
+                self.ui.mp('you yank the ripcord and the')
+                self.ui.mp("'chute comes billowing out.")
                 if self.current_position == 32:
                     self.current_position = 40
                     self.describe_current_position()
                 else:
-                    print('you land safely')
-                    print('congratulations on escaping!')
+                    self.ui.mp('you land safely')
+                    self.ui.mp('congratulations on escaping!')
                     self.flags["escaped"] = True
                     self.final_stats()
-            print('you hit the ground.')
-            print("you have broken your neck!")
-            print("you are dead.")
+            self.ui.mp('you hit the ground.')
+            self.ui.mp("you have broken your neck!")
+            self.ui.mp("you are dead.")
             self.flags["game_over"] = True
             self.final_stats()
 
     def jump_down_stairs(self):
         if self.flags["jump_warning"]:
-            print("now you've done it.  you ignored")
-            print("my warning, and as a result")
-            print("you have broken your neck!")
-            print("you are dead.")
+            self.ui.mp("now you've done it.  you ignored")
+            self.ui.mp("my warning, and as a result")
+            self.ui.mp("you have broken your neck!")
+            self.ui.mp("you are dead.")
             self.flags["game_over"] = True
             self.final_stats()
         else:
-            print('you have landed down-stairs,')
-            print('and narrowly escaped serious')
-            print("injury.  please don't try it again.")
+            self.ui.mp('you have landed down-stairs,')
+            self.ui.mp('and narrowly escaped serious')
+            self.ui.mp("injury.  please don't try it again.")
             self.flags["jump_warning"] = True
             self.current_position = 2
             self.describe_current_position()
@@ -749,13 +751,13 @@ class Miser:
     def swim_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.current_position != 19 and self.current_position != 25:
-            print("there's nothing here to swim in!")
+            self.ui.mp("there's nothing here to swim in!")
         elif self.current_position == 19:
-            print('the water is only a few inches deep.')
+            self.ui.mp('the water is only a few inches deep.')
         elif self.flags["pool_flooded"]:
-            print("in mercury?  no way!")
+            self.ui.mp("in mercury?  no way!")
         else:
-            print('the pool is empty.')
+            self.ui.mp('the pool is empty.')
 
     # fix
     def fix_command(self, subject_index, subject):
@@ -763,91 +765,100 @@ class Miser:
         if subject_index == 0:
             error_unknown_object('what')
         elif subject_index == 7:
-            print("i ain't no plumber!")
+            self.ui.mp("i ain't no plumber!")
         elif subject_index != 17:
-            print("i wouldn't know how.")
+            self.ui.mp("i wouldn't know how.")
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
             error_not_here()
         elif self.items[14].location == -2:
-            print("it's already fixed.")
+            self.ui.mp("it's already fixed.")
         elif self.items[17].location != -1:
-            print("i'll need a ripcord.")
+            self.ui.mp("i'll need a ripcord.")
         else:
-            print("i'm no expert, but i think it'll work.")
+            self.ui.mp("i'm no expert, but i think it'll work.")
             self.items[27].location = self.items[14].location
             self.items[14].location = -2
             self.subjects[17].item_id = 27
             self.items[17].location = 0
 
     def describe_current_position(self):
-        wrap_string(f'you are in the {self.rooms[self.current_position].text}')
+        self.wrap_string(f'you are in the {self.rooms[self.current_position].text}', text_wrap_width)
         for x in range(1, len(self.items)):
             if self.items[x].location == self.current_position:
-                wrap_string(f'there is a {self.items[x].text} here')
+                self.wrap_string(f'there is a {self.items[x].text} here', text_wrap_width)
             if x == 1 and self.flags["bucket_full"] and self.items[1].location == self.current_position:
-                print("the bucket is full of water")
+                self.ui.mp("the bucket is full of water")
         if self.current_position == 25:
             if self.flags["pool_flooded"]:
-                print('the pool is full of liquid mercury')
+                self.ui.mp('the pool is full of liquid mercury')
             else:
-                print("the pool's empty")
+                self.ui.mp("the pool's empty")
                 if self.items[7].location == 48:
-                    print('i see something shiny in the pool!')
+                    self.ui.mp('i see something shiny in the pool!')
         if self.current_position == 10 and self.flags["fire_burning"]:
-            print('there is a hot fire on the south wall!')
-            print("if I go that way I'll burn to death!")
+            self.ui.mp('there is a hot fire on the south wall!')
+            self.ui.mp("if I go that way I'll burn to death!")
         if self.current_position == 16:
-            wrap_string("a rich, full voice says, 'ritnew is a charming word'.")
+            self.wrap_string("a rich, full voice says, 'ritnew is a charming word'.", text_wrap_width)
         if self.current_position == 26:
-            print('there is a valve on one of the pipes.')
+            self.ui.mp('there is a valve on one of the pipes.')
         if self.current_position == 23:
-            print('there is a leaky faucet nearby.')
+            self.ui.mp('there is a leaky faucet nearby.')
         if self.current_position == 10 and not self.flags["fire_burning"]:
-            print('there is evidence of a recent fire here.')
+            self.ui.mp('there is evidence of a recent fire here.')
         if self.current_position == 5 and self.flags["found_vault"]:
-            print('there is a vault in the east wall.')
+            self.ui.mp('there is a vault in the east wall.')
         if self.current_position == 5 and self.flags["vault_open"]:
-            print('the vault is open')
+            self.ui.mp('the vault is open')
         if self.current_position == 0 and self.flags["dungeon_unlocked"]:
-            print('an open door leads north.')
+            self.ui.mp('an open door leads north.')
         if self.current_position != 48:
-            print('obvious exits:')
+            self.ui.mp('obvious exits:')
             if self.rooms[self.current_position].moves[Move.NORTH] > 0:
-                print('n ', end='')
+                self.ui.mp('n ', end='')
             if self.rooms[self.current_position].moves[Move.SOUTH] > 0:
-                print('s ', end='')
+                self.ui.mp('s ', end='')
             if self.rooms[self.current_position].moves[Move.EAST] > 0:
-                print('e ', end='')
+                self.ui.mp('e ', end='')
             if self.rooms[self.current_position].moves[Move.WEST] > 0:
-                print('w ', end='')
-            print('')
+                self.ui.mp('w ', end='')
+            self.ui.mp('')
 
     def final_stats(self):
-        print('you accumulated', self.gathered_treasures, 'treasures,')
-        print('for a score of', self.gathered_treasures * 20, 'points.')
-        print('(100 possible)')
+        self.ui.mp('you accumulated', self.gathered_treasures, 'treasures,')
+        self.ui.mp('for a score of', self.gathered_treasures * 20, 'points.')
+        self.ui.mp('(100 possible)')
         if not self.flags["escaped"]:
-            print('however, you did not escape.')
-        print('this puts you in a class of:')
+            self.ui.mp('however, you did not escape.')
+        self.ui.mp('this puts you in a class of:')
         if self.flags["escaped"]:
             self.gathered_treasures += 1
         if self.gathered_treasures == 0:
-            print('<beginner adventurer>')
+            self.ui.mp('<beginner adventurer>')
         elif self.gathered_treasures == 1:
-            print('<amateur adventurer>')
+            self.ui.mp('<amateur adventurer>')
         elif self.gathered_treasures == 2:
-            print('<journeyman adventurer>')
+            self.ui.mp('<journeyman adventurer>')
         elif self.gathered_treasures == 3:
-            print('<experienced adventurer>')
+            self.ui.mp('<experienced adventurer>')
         elif self.gathered_treasures == 4:
-            print('<professional adventurer>')
+            self.ui.mp('<professional adventurer>')
         elif self.gathered_treasures == 5:
-            print('<master adventurer>')
+            self.ui.mp('<master adventurer>')
         else:
-            print('<grandmaster adventurer>')
+            self.ui.mp('<grandmaster adventurer>')
         if self.gathered_treasures < 6:
-            print('better luck next time!')
+            self.ui.mp('better luck next time!')
+
+    @staticmethod
+    def wrap_string(long_string, width):
+        if len(long_string) < width:
+            print(long_string)
+        else:
+            last_space_index = long_string.rfind(' ', 0, width)
+            print(long_string[:last_space_index])
+            print(long_string[last_space_index + 1:])
 
 
 class Move(IntEnum):
@@ -893,6 +904,12 @@ class VerbClass:
         self.handler = handler
 
 
+class IUserInterface:
+    @staticmethod
+    def mp(*args, sep=' ', end='\n'):
+        raise NotImplementedError
+
+
 def error_unknown_object(subject):
     global help_index
     print(f'{subject}?  {help_strings[help_index]}')
@@ -907,16 +924,6 @@ def error_not_here():
 
 def error_no_path():
     print("it's impossible to go that way.")
-
-
-def wrap_string(long_string):
-    global text_wrap_width
-    if len(long_string) < text_wrap_width:
-        print(long_string)
-    else:
-        last_space_index = long_string.rfind(' ', 0, text_wrap_width)
-        print(long_string[:last_space_index])
-        print(long_string[last_space_index + 1:])
 
 
 def get_input():

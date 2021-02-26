@@ -1,15 +1,23 @@
 import unittest
-from miserLib import Miser
+from miserLib import Miser, IUserInterface
+
+
+class TestUI(IUserInterface):
+    @staticmethod
+    def mp(*args, sep=' ', end='\n'):
+        pass
 
 
 class MiserTest(unittest.TestCase):
     def test_can_create(self):
-        miser = Miser()
+        ui = TestUI()
+        miser = Miser(ui)
         self.assertIsInstance(miser, Miser)
         self.assertEqual(miser.current_position, 0)
 
     def test_get_inside(self):
-        miser = Miser()
+        ui = TestUI()
+        miser = Miser(ui)
         miser.handle_command(["get", "mat"])
         miser.handle_command(["get", "key"])
         miser.handle_command(["unlock", "door"])
@@ -17,7 +25,8 @@ class MiserTest(unittest.TestCase):
         self.assertEqual(miser.current_position, 1)
 
     def test_get_and_drop_work(self):
-        miser = Miser()
+        ui = TestUI()
+        miser = Miser(ui)
         mat_index = 2
         self.assertEqual(miser.get_item_location(mat_index), 0)
         miser.handle_command(["get", "mat"])
@@ -26,7 +35,8 @@ class MiserTest(unittest.TestCase):
         self.assertEqual(miser.get_item_location(mat_index), 0)
 
     def test_exposing_key_works(self):
-        miser = Miser()
+        ui = TestUI()
+        miser = Miser(ui)
         key_index = 6
         self.assertEqual(miser.get_item_location(key_index), -2)
         miser.handle_command(["get", "mat"])
