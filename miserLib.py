@@ -15,34 +15,85 @@ import pyreadline.rlmain
 # constants
 PROGRAM_NAME, CURSOR_ISSUE = 'miser', '27'
 
-
 # todo make help message class
 help_strings, help_index = [], 0
 
-# UI configuration
-text_wrap_width = 80
-read_line = pyreadline.Readline()
-prompt = "> "
+
+# UI base class configuration
+class IUserInterface:
+    text_wrap_width = 80
+    read_line = None
+    prompt = None
+
+    def mp(self, *args, sep=' ', end='\n'):
+        raise NotImplementedError
+
+    def wrap_print(self, long_string):
+        raise NotImplementedError
+
+    def clear_screen(self):
+        raise NotImplementedError
+
+    def get_input(self):
+        raise NotImplementedError
+
+    def wait_for_keypress(self):
+        raise NotImplementedError
+
+    def delay(self):
+        raise NotImplementedError
 
 
-def clear_screen():
-    read_line.console.home()
-    read_line.console.clear_to_end_of_window()
+class WindowsConsoleUserInterface(IUserInterface):
+    text_wrap_width = 80
+    read_line = pyreadline.Readline()
+    prompt = "> "
+
+    def mp(self, *args, sep=' ', end='\n'):
+        if len(args) == 0:
+            print(end=end)
+        else:
+            for arg in args:
+                print(arg, end=sep)
+            print(end=end)
+
+    def wrap_print(self, long_string):
+        if len(long_string) < self.text_wrap_width:
+            self.mp(long_string)
+        else:
+            last_space_index = long_string.rfind(' ', 0, self.text_wrap_width)
+            self.mp(long_string[:last_space_index])
+            self.mp(long_string[last_space_index + 1:])
+
+    def clear_screen(self):
+        self.read_line.console.home()
+        self.read_line.console.clear_to_end_of_window()
+
+    def get_input(self):
+        return self.read_line.readline(self.prompt)
+
+    def wait_for_keypress(self):
+        _ = self.read_line.readline()
+
+    def delay(self):
+        pass
 
 
-def wait_for_keypress():
-    _ = read_line.readline()
-
-
-def delay():
-    pass
+def welcome_banner(ui):
+    ui.mp(f'{PROGRAM_NAME:>12} by m.j. lansing')
+    ui.mp(f'   cursor # {CURSOR_ISSUE}  copyright (c) 1981')
+    ui.mp('*' * 40)
+    ui.mp("explore the miser's house   (needs 16k)")
+    ui.mp('\n\n\npress return to begin')
+    ui.wait_for_keypress()
+    ui.mp('\n\none moment please...')
 
 
 #
 # Class for the overall Miser game
 #
 class Miser:
-    def __init__(self, ui):
+    def __init__(self, ui=WindowsConsoleUserInterface()):
         self.ui = ui
         self.flags = {
             "game_over": False,
@@ -61,16 +112,16 @@ class Miser:
             "portal_visible": False
         }
 
+        global help_strings
+        help_strings = ['what?', "i don't understand that"]
+
         self.current_position = 0
         self.gathered_treasures = 0
 
-        self.items = []
         self.rooms = []
         self.verbs = []
         self.subjects = []
-
-        global help_strings
-        help_strings = ['what?', "i don't understand that"]
+        self.items = []
 
         self.initialize_rooms()
         self.initialize_verbs()
@@ -217,7 +268,7 @@ class Miser:
     def main_command_loop(self):
         while not self.flags["game_over"]:
             self.ui.mp()
-            input_str = get_input()
+            input_str = self.ui.get_input()
             input_str.strip()
             parsed_words = input_str.split()
             if len(parsed_words) < 1 or len(parsed_words) > 2:
@@ -236,7 +287,7 @@ class Miser:
                 verb_index = x
                 break
         if verb_index == -1:
-            error_unknown_object(command_verb)
+            self.error_unknown_object(command_verb)
             return
 
         if len(word_list) == 1:
@@ -251,7 +302,7 @@ class Miser:
                     subject_index = x
                     break
             if subject_index == -1:
-                error_unknown_object(subject)
+                self.error_unknown_object(subject)
                 return
 
         self.verbs[verb_index].handler(subject_index, subject)
@@ -266,13 +317,13 @@ class Miser:
     def get_take_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('what?')
+            self.error_unknown_object('what?')
         elif self.subjects[subject_index].item_id == -1:
             self.ui.mp('i am unable to do that.')
         elif self.get_item_location(subject_index) == -1:
             self.ui.mp("you're already carrying it")
         elif self.get_item_location(subject_index) != self.current_position:
-            error_not_here()
+            self.error_not_here()
         else:
             self.items[self.subjects[subject_index].item_id].location = -1
             self.ui.mp('ok')
@@ -287,7 +338,7 @@ class Miser:
     def move_slide_push_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('move what?')
+            self.error_unknown_object('move what?')
         elif subject_index == 13 and self.current_position == 5 and self.rooms[5].moves[Move.EAST] == 0:
             self.ui.mp('behind the cabinet is a vault!')
             self.flags["found_vault"] = True
@@ -296,7 +347,7 @@ class Miser:
             self.ui.mp('that item stays put.')
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         elif subject_index == 2 and self.items[20].location == -2:
             self.ui.mp('you find a door key!')
             self.items[20].location = 0
@@ -311,7 +362,7 @@ class Miser:
     def open_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('open what?')
+            self.error_unknown_object('open what?')
         elif subject_index == 11:
             self.open_book(subject_index)
         elif subject_index == 7:
@@ -335,30 +386,30 @@ class Miser:
         elif self.current_position == 0 and self.flags["dungeon_unlocked"]:
             self.ui.mp("it's already open.")
         elif self.current_position != 6:
-            error_not_here()
+            self.error_not_here()
         else:
-            self.wrap_string('you open the door. you lean over to peer in, and you fall in!', text_wrap_width)
+            self.ui.wrap_print('you open the door. you lean over to peer in, and you fall in!')
             self.current_position = 47
             self.describe_current_position()
 
     def open_cabinet(self):
         if self.items[26].location != self.current_position:
-            error_not_here()
+            self.error_not_here()
         else:
             self.ui.mp('the cabinet is empty and dusty.')
-            self.wrap_string("scribbled in the dust on one shelf are the words, 'behind me'.", text_wrap_width)
+            self.ui.wrap_print("scribbled in the dust on one shelf are the words, 'behind me'.")
 
     def open_bag(self, subject_index):
-        if self.get_item_location(subject_index) != self.current_position\
+        if self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         else:
             self.ui.mp('the bag is knotted securely.')
             self.ui.mp("it won't open.")
 
     def open_vault(self):
         if self.current_position != 5 or not self.flags["found_vault"]:
-            error_not_here()
+            self.error_not_here()
         elif self.flags["vault_open"]:
             self.ui.mp("it's already open.")
         else:
@@ -366,7 +417,7 @@ class Miser:
 
     def open_organ(self):
         if self.current_position != 21:
-            error_not_here()
+            self.error_not_here()
         elif not self.flags["organ_playing"]:
             self.ui.mp("it's stuck shut.")
         elif self.items[24].location == -2:
@@ -382,20 +433,20 @@ class Miser:
     def open_book(self, subject_index):
         if self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         else:
-            self.wrap_string("scrawled in blood on the inside front cover is the message,", text_wrap_width)
+            self.ui.wrap_print("scrawled in blood on the inside front cover is the message,")
             self.ui.mp("''victory' is a prize-winning word'.")
 
     # read
     def read_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('read what?')
+            self.error_unknown_object('read what?')
         elif self.subjects[subject_index].item_id > -1 \
                 and self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         elif self.subjects[subject_index].item_id == -1:
             self.ui.mp("there's nothing written on that.")
         elif subject_index != 3 and subject_index != 11:
@@ -427,11 +478,11 @@ class Miser:
     def quit_command(self, subject_index, subject):
         _, _ = subject_index, subject
         self.ui.mp('do you indeed wish to quit now?')
-        input_str = get_input()
+        input_str = self.ui.get_input()
         if input_str[0].lower() != 'y':
             self.ui.mp('ok')
         else:
-            clear_screen()
+            self.ui.clear_screen()
             self.final_stats()
             self.flags["game_over"] = True
 
@@ -446,12 +497,12 @@ class Miser:
         if (3 < x < 9) or x == 19:
             self.ui.mp("don't drop *treasures*!")
         elif self.current_position == 19 and subject_index == 19:
-            self.wrap_string('as the penny sinks below the surface of the pool, a fleeting image of', text_wrap_width)
+            self.ui.wrap_print('as the penny sinks below the surface of the pool, a fleeting image of')
             self.ui.mp('a chapel with dancers appears.')
             self.rooms[21].moves[Move.EAST] = 22
             self.items[12].location = -2
         elif self.current_position == 22 and subject_index == 20:
-            self.wrap_string('even before it hits the ground, the cross fades away!', text_wrap_width)
+            self.ui.wrap_print('even before it hits the ground, the cross fades away!')
             self.ui.mp('the tablet has disintegrated.')
             self.ui.mp('you hear music from the organ.')
             self.flags["organ_playing"] = True
@@ -474,7 +525,7 @@ class Miser:
             self.ui.mp("a hollow voice says, 'wrong adventure'.")
         else:
             self.ui.mp('okay, "', word, '".')
-            delay()
+            self.ui.delay()
             self.ui.mp('nothing happens.')
 
     def say_victory(self):
@@ -490,7 +541,7 @@ class Miser:
         if self.current_position != 4 or self.flags["snake_charmed"]:
             self.ui.mp('nothing happens.')
         else:
-            self.wrap_string('the snake is charmed by the very utterance of your words.', text_wrap_width)
+            self.ui.wrap_print('the snake is charmed by the very utterance of your words.')
             self.flags["snake_charmed"] = True
             self.items[2].location = -2
             self.items[3].location = 4
@@ -501,7 +552,7 @@ class Miser:
         if subject_index != 4:
             self.ui.mp("i wouldn't know how.")
         elif self.items[1].location != -1 and self.items[1].location != self.current_position:
-            error_not_here()
+            self.error_not_here()
         elif not self.flags["bucket_full"]:
             self.ui.mp('the bucket is already empty')
         elif self.current_position == 19:
@@ -520,12 +571,12 @@ class Miser:
     def fill_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('what?')
+            self.error_unknown_object('what?')
         elif self.subjects[subject_index].item_id == -1:
             self.ui.mp("that wouldn't hold anything.")
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         elif subject_index != 4:
             self.ui.mp("that wouldn't hold anything.")
         elif self.flags["bucket_full"]:
@@ -542,17 +593,17 @@ class Miser:
     def unlock_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('what?')
+            self.error_unknown_object('what?')
         elif subject_index != 12 and subject_index != 27:
             self.ui.mp("i wouldn't know how to unlock one.")
         elif self.current_position != 0 and self.current_position != 5 and self.current_position != 6:
-            error_not_here()
+            self.error_not_here()
         elif self.current_position == 0 and subject_index == 12:
             self.unlock_front_door()
         elif self.current_position == 5 and subject_index == 27:
             self.unlock_vault()
         elif self.current_position != 6 or subject_index != 12 or self.items[16].location != -2:
-            error_not_here()
+            self.error_not_here()
         else:
             self.ui.mp('the trapdoor has no lock')
 
@@ -560,7 +611,7 @@ class Miser:
         if self.flags["vault_open"]:
             self.ui.mp("it's already open.")
         elif not self.flags["found_vault"]:
-            error_not_here()
+            self.error_not_here()
         elif not self.flags["know_combination"]:
             self.ui.mp('i don''t know the combination.')
         else:
@@ -589,13 +640,13 @@ class Miser:
     def go_command(self, subject_index, subject):
         _ = subject
         if subject_index != 8 and subject_index != 18 and subject_index != 28:
-            error_unknown_object('what?')
+            self.error_unknown_object('what?')
         elif subject_index == 8 and self.current_position != 48:
-            error_not_here()
+            self.error_not_here()
         elif subject_index == 18 and self.current_position != 2 and self.current_position != 27:
-            error_not_here()
+            self.error_not_here()
         elif subject_index == 28 and self.current_position != 25:
-            error_not_here()
+            self.error_not_here()
         elif subject_index == 8:
             self.current_position = 25
             self.describe_current_position()
@@ -612,7 +663,7 @@ class Miser:
             self.current_position = 27
             self.describe_current_position()
         else:
-            self.wrap_string('the suits of armor prevent you from going up!', text_wrap_width)
+            self.ui.wrap_print('the suits of armor prevent you from going up!')
 
     # north
     def north_command(self, subject_index, subject):
@@ -621,7 +672,7 @@ class Miser:
             self.ui.mp('the door is locked shut.')
             return
         elif self.rooms[self.current_position].moves[Move.NORTH] == 0:
-            error_no_path()
+            self.error_no_path()
             return
         elif self.current_position == 0:
             self.ui.mp('the door slams shut behind you!')
@@ -636,7 +687,7 @@ class Miser:
             self.flags["game_over"] = True
             self.final_stats()
         elif self.rooms[self.current_position].moves[Move.SOUTH] == 0:
-            error_no_path()
+            self.error_no_path()
         else:
             self.current_position = self.rooms[self.current_position].moves[Move.SOUTH]
             self.describe_current_position()
@@ -653,7 +704,7 @@ class Miser:
             self.flags["game_over"] = True
             self.final_stats()
         elif self.rooms[self.current_position].moves[Move.EAST] == 0:
-            error_no_path()
+            self.error_no_path()
         else:
             self.current_position = self.rooms[self.current_position].moves[Move.EAST]
             self.describe_current_position()
@@ -662,7 +713,7 @@ class Miser:
     def west_command(self, subject_index, subject):
         _, _ = subject_index, subject
         if self.rooms[self.current_position].moves[Move.WEST] == 0:
-            error_no_path()
+            self.error_no_path()
         else:
             self.current_position = self.rooms[self.current_position].moves[Move.WEST]
             self.describe_current_position()
@@ -676,7 +727,7 @@ class Miser:
         self.ui.mp('(100 possible)')
         while not self.flags["game_over"]:
             self.ui.mp('do you indeed wish to quit now? ')
-            input_str = get_input()
+            input_str = self.ui.get_input()
             if input_str[0].lower() == 'y':
                 self.flags["game_over"] = True
                 self.final_stats()
@@ -692,10 +743,9 @@ class Miser:
             self.ui.mp("i don't know how to turn such a thing.")
             self.describe_current_position()
         elif self.current_position != 26:
-            error_not_here()
+            self.error_not_here()
         else:
-            self.wrap_string('with much effort, you turn the valve 5 times.  you hear the sound of liquid',
-                             text_wrap_width)
+            self.ui.wrap_print('with much effort, you turn the valve 5 times.  you hear the sound of liquid')
             self.ui.mp('flowing through the pipes.')
             self.flags["pool_flooded"] = not self.flags["pool_flooded"]
             if not self.flags["pool_flooded"] and self.items[7].location == -3:
@@ -763,14 +813,14 @@ class Miser:
     def fix_command(self, subject_index, subject):
         _ = subject
         if subject_index == 0:
-            error_unknown_object('what')
+            self.error_unknown_object('what')
         elif subject_index == 7:
             self.ui.mp("i ain't no plumber!")
         elif subject_index != 17:
             self.ui.mp("i wouldn't know how.")
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
-            error_not_here()
+            self.error_not_here()
         elif self.items[14].location == -2:
             self.ui.mp("it's already fixed.")
         elif self.items[17].location != -1:
@@ -783,10 +833,10 @@ class Miser:
             self.items[17].location = 0
 
     def describe_current_position(self):
-        self.wrap_string(f'you are in the {self.rooms[self.current_position].text}', text_wrap_width)
+        self.ui.wrap_print(f'you are in the {self.rooms[self.current_position].text}')
         for x in range(1, len(self.items)):
             if self.items[x].location == self.current_position:
-                self.wrap_string(f'there is a {self.items[x].text} here', text_wrap_width)
+                self.ui.wrap_print(f'there is a {self.items[x].text} here')
             if x == 1 and self.flags["bucket_full"] and self.items[1].location == self.current_position:
                 self.ui.mp("the bucket is full of water")
         if self.current_position == 25:
@@ -800,7 +850,7 @@ class Miser:
             self.ui.mp('there is a hot fire on the south wall!')
             self.ui.mp("if I go that way I'll burn to death!")
         if self.current_position == 16:
-            self.wrap_string("a rich, full voice says, 'ritnew is a charming word'.", text_wrap_width)
+            self.ui.wrap_print("a rich, full voice says, 'ritnew is a charming word'.")
         if self.current_position == 26:
             self.ui.mp('there is a valve on one of the pipes.')
         if self.current_position == 23:
@@ -851,14 +901,18 @@ class Miser:
         if self.gathered_treasures < 6:
             self.ui.mp('better luck next time!')
 
-    @staticmethod
-    def wrap_string(long_string, width):
-        if len(long_string) < width:
-            print(long_string)
-        else:
-            last_space_index = long_string.rfind(' ', 0, width)
-            print(long_string[:last_space_index])
-            print(long_string[last_space_index + 1:])
+    def error_unknown_object(self, subject):
+        global help_index
+        self.ui.mp(f'{subject}?  {help_strings[help_index]}')
+        help_index += 1
+        if help_index >= len(help_strings):
+            help_index = 0
+
+    def error_not_here(self):
+        self.ui.mp("i don't see it here")
+
+    def error_no_path(self):
+        self.ui.mp("it's impossible to go that way.")
 
 
 class Move(IntEnum):
@@ -902,30 +956,3 @@ class VerbClass:
     def __init__(self, text, handler):
         self.text = text
         self.handler = handler
-
-
-class IUserInterface:
-    @staticmethod
-    def mp(*args, sep=' ', end='\n'):
-        raise NotImplementedError
-
-
-def error_unknown_object(subject):
-    global help_index
-    print(f'{subject}?  {help_strings[help_index]}')
-    help_index += 1
-    if help_index >= len(help_strings):
-        help_index = 0
-
-
-def error_not_here():
-    print("i don't see it here")
-
-
-def error_no_path():
-    print("it's impossible to go that way.")
-
-
-def get_input():
-    global prompt
-    return read_line.readline(prompt)

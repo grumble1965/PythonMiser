@@ -3,8 +3,22 @@ from miserLib import Miser, IUserInterface
 
 
 class TestUI(IUserInterface):
-    @staticmethod
-    def mp(*args, sep=' ', end='\n'):
+    def mp(self, *args, sep=' ', end='\n'):
+        pass
+
+    def wrap_print(self, long_string):
+        pass
+
+    def clear_screen(self):
+        pass
+
+    def get_input(self):
+        pass
+
+    def wait_for_keypress(self):
+        pass
+
+    def delay(self):
         pass
 
 
