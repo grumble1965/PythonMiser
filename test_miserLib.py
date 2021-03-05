@@ -1,5 +1,5 @@
 import unittest
-from miserLib import Miser, IUserInterface, Items, Rooms
+from miserLib import Miser, IUserInterface, Items, Rooms, Subjects
 
 
 class TestUI(IUserInterface):
@@ -41,39 +41,35 @@ class MiserTest(unittest.TestCase):
     def test_get_and_drop_work(self):
         ui = TestUI()
         miser = Miser(ui)
-        mat_index = 2
-        self.assertEqual(miser.get_item_location(mat_index), Rooms.FRONT_PORCH)
+        self.assertEqual(miser.get_item_location(Subjects.MAT), Rooms.FRONT_PORCH)
         miser.handle_command(["get", "mat"])
-        self.assertEqual(miser.get_item_location(mat_index), -1)
+        self.assertEqual(miser.get_item_location(Subjects.MAT), -1)
         miser.handle_command(["drop", "mat"])
-        self.assertEqual(miser.get_item_location(mat_index), Rooms.FRONT_PORCH)
+        self.assertEqual(miser.get_item_location(Subjects.MAT), Rooms.FRONT_PORCH)
         miser.handle_command(["drop", "mat"])
-        self.assertEqual(miser.get_item_location(mat_index), Rooms.FRONT_PORCH)
+        self.assertEqual(miser.get_item_location(Subjects.MAT), Rooms.FRONT_PORCH)
         miser.handle_command(["get", "mat"])
         miser.handle_command(["get", "mat"])
-        self.assertEqual(miser.get_item_location(mat_index), -1)
-        valve_index = 7
+        self.assertEqual(miser.get_item_location(Subjects.MAT), -1)
         miser.current_position = Rooms.PUMP_HOUSE
         miser.handle_command(["get", "valve"])
-        self.assertEqual(miser.subjects[valve_index].item_id, Items.UNMOVEABLE)
+        self.assertEqual(miser.subjects[Subjects.VALVE].item_id, Items.UNMOVEABLE)
         treasure_count = miser.gathered_treasures
         miser.current_position = Rooms.HEDGE_MAZE5
         miser.handle_command(["get", "leaf"])
         self.assertEqual(miser.gathered_treasures, treasure_count + 1)
         miser.handle_command(["drop", "leaf"])
         self.assertEqual(miser.gathered_treasures, treasure_count + 1)
-        penny_index = 19
         miser.current_position = Rooms.WEST_BEDROOM
         miser.handle_command(["get", "penny"])
-        self.assertEqual(miser.get_item_location(penny_index), -1)
+        self.assertEqual(miser.get_item_location(Subjects.PENNY), -1)
         miser.current_position = Rooms.PORTICO
         miser.handle_command(["drop", "penny"])
         self.assertEqual(miser.rooms[Rooms.BALLROOM].moves[2], Rooms.CHAPEL)
         self.assertEqual(miser.items[Items.PENNY].location, -2)
-        cross_index = 20
         miser.current_position = Rooms.BACK_YARD
         miser.handle_command(["get", "cross"])
-        self.assertEqual(miser.get_item_location(cross_index), -1)
+        self.assertEqual(miser.get_item_location(Subjects.CROSS), -1)
         miser.current_position = Rooms.CHAPEL
         miser.flags["organ_playing"] = False
         miser.handle_command(["drop", "cross"])
@@ -82,10 +78,9 @@ class MiserTest(unittest.TestCase):
     def test_exposing_key_works(self):
         ui = TestUI()
         miser = Miser(ui)
-        key_index = 6
-        self.assertEqual(miser.get_item_location(key_index), -2)
+        self.assertEqual(miser.get_item_location(Subjects.KEY), -2)
         miser.handle_command(["move", "mat"])
-        self.assertEqual(miser.get_item_location(key_index), Rooms.FRONT_PORCH)
+        self.assertEqual(miser.get_item_location(Subjects.KEY), Rooms.FRONT_PORCH)
 
     def test_handle_command(self):
         ui = TestUI()
@@ -107,6 +102,17 @@ class MiserTest(unittest.TestCase):
         miser.handle_command(["get", "key"])
         miser.handle_command(["inventory"])
         self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # full bucket works
+        miser.current_position = Rooms.PUMP_HOUSE
+        miser.handle_command(["get", "bucket"])
+        miser.flags["bucket_full"] = True
+        miser.handle_command(["inventory"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # broken parachute works
+        miser.current_position = Rooms.CLOSET
+        miser.handle_command(["get", "parachute"])
+        miser.handle_command(["inventory"])
+        self.assertEqual(miser.current_position, Rooms.CLOSET)
 
     def test_say_command(self):
         ui = TestUI()
@@ -264,6 +270,8 @@ class MiserTest(unittest.TestCase):
         miser = Miser(ui)
         miser.handle_command(["pour", "mat"])
         self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        miser.handle_command(["pour", "bucket"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
         miser.current_position = Rooms.PUMP_HOUSE
         miser.handle_command(["pour", "bucket"])
         self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
@@ -279,6 +287,11 @@ class MiserTest(unittest.TestCase):
         self.assertEqual(miser.current_position, Rooms.BLUE_ROOM)
         self.assertEqual(miser.flags["fire_burning"], False)
         self.assertEqual(miser.flags["bucket_full"], False)
+        # pour into wishing well
+        miser.flags["bucket_full"] = True
+        miser.current_position = Rooms.PORTICO
+        miser.handle_command(["pour", "bucket"])
+        self.assertEqual(miser.current_position, Rooms.PORTICO)
 
     def test_fill_things(self):
         ui = TestUI()
@@ -310,6 +323,122 @@ class MiserTest(unittest.TestCase):
         miser.handle_command(["fill", "bucket"])
         self.assertEqual(miser.current_position, Rooms.BACK_YARD)
         self.assertEqual(miser.flags["bucket_full"], True)
+
+    def test_read_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # read something not present
+        miser.handle_command(["read", "ring"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # read something unmovable
+        miser.handle_command(["read", "door"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # read something without writing
+        miser.handle_command(["read", "mat"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # read a book
+        miser.current_position = Rooms.LIBRARY
+        miser.handle_command(["read", "book"])
+        self.assertEqual(miser.current_position, Rooms.LIBRARY)
+        # read a paper
+        miser.current_position = Rooms.MASTER_BEDROOM
+        miser.handle_command(["read", "paper"])
+        self.assertEqual(miser.current_position, Rooms.MASTER_BEDROOM)
+
+    def test_look_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # carrying full bucket
+        miser.current_position = Rooms.PUMP_HOUSE
+        miser.flags["bucket_full"] = True
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # pool flooded and empty
+        miser.current_position = Rooms.POOL_AREA
+        miser.flags["pool_flooded"] = False
+        miser.handle_command(["look"])
+        miser.flags["pool_flooded"] = True
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.POOL_AREA)
+        # fire in Blue room
+        miser.current_position = Rooms.BLUE_ROOM
+        miser.flags["fire_burning"] = True
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.BLUE_ROOM)
+        # pantry
+        miser.current_position = Rooms.PANTRY
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.PANTRY)
+        # back yard
+        miser.current_position = Rooms.BACK_YARD
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.BACK_YARD)
+        # open vault in Red Wall room
+        miser.current_position = Rooms.REDWALL_ROOM
+        miser.flags["vault_open"] = True
+        miser.handle_command(["look"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+
+    def test_fix_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # fix valve
+        miser.current_position = Rooms.PUMP_HOUSE
+        miser.handle_command(["fix", "valve"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # fix not parachute
+        miser.handle_command(["fix", "bucket"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # fix parachute when not here
+        miser.handle_command(["fix", "parachute"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # fix parachute without ripcord
+        miser.current_position = Rooms.CLOSET
+        miser.handle_command(["get", "parachute"])
+        miser.handle_command(["fix", "parachute"])
+        self.assertEqual(miser.current_position, Rooms.CLOSET)
+        # fix parachute
+        miser.current_position = Rooms.BALLROOM
+        miser.flags["organ_playing"] = True
+        miser.handle_command(["open", "organ"])
+        self.assertEqual(miser.get_item_location(Subjects.RIPCORD), Rooms.BALLROOM)
+        miser.handle_command(["get", "ripcord"])
+        miser.handle_command(["fix", "parachute"])
+        self.assertEqual(miser.current_position, Rooms.BALLROOM)
+        # fix it again
+        miser.handle_command(["fix", "parachute"])
+        self.assertEqual(miser.current_position, Rooms.BALLROOM)
+
+    def test_swim_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # can't swim here
+        miser.handle_command(["swim"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # swim in wishing well
+        miser.current_position = Rooms.PORTICO
+        miser.handle_command(["swim"])
+        self.assertEqual(miser.current_position, Rooms.PORTICO)
+        # swim in mercury pool
+        miser.current_position = Rooms.POOL_AREA
+        miser.handle_command(["swim"])
+        self.assertEqual(miser.current_position, Rooms.POOL_AREA)
+        # swim in empty pool
+        miser.flags["pool_flooded"] = False
+        miser.handle_command(["swim"])
+        self.assertEqual(miser.current_position, Rooms.POOL_AREA)
+
+    def test_unlock_command(self):
+        pass
+
+    def test_go_command(self):
+        pass
+
+    def test_open_command(self):
+        pass
+
+    def test_go_command(self):
+        pass
 
 
 def suite():
