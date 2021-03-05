@@ -3,6 +3,9 @@ from miserLib import Miser, IUserInterface, Items, Rooms, Subjects, welcome_bann
 
 
 class TestUI(IUserInterface):
+    def __init__(self):
+        self.input_buffer = []
+
     def mp(self, *args, sep=' ', end='\n'):
         pass
 
@@ -13,10 +16,13 @@ class TestUI(IUserInterface):
         pass
 
     def get_input(self):
-        pass
+        value = None
+        if len(self.input_buffer) > 0:
+            value, self.input_buffer = self.input_buffer[0], self.input_buffer[1:]
+        return value
 
     def wait_for_keypress(self):
-        pass
+        return None
 
     def delay(self):
         pass
@@ -627,6 +633,38 @@ class MiserTest(unittest.TestCase):
         ui = TestUI()
         welcome_banner(ui)
         self.assertTrue(True)
+
+    def test_main_command_loop(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # loop exits when game over
+        miser.flags["game_over"] = True
+        miser.main_command_loop()
+        self.assertTrue(True)
+        # loop can exit from user input
+        miser.flags["game_over"] = False
+        ui.input_buffer = ["quit", "y"]
+        miser.main_command_loop()
+        self.assertTrue(miser.flags["game_over"])
+        # bad input is handled
+        miser.flags["game_over"] = False
+        ui.input_buffer = ["this is a test", "quit", "y"]
+        miser.main_command_loop()
+        self.assertTrue(miser.flags["game_over"])
+
+    def test_score_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # score can exit from user input
+        miser.flags["game_over"] = False
+        ui.input_buffer = ["y"]
+        miser.handle_command(["score"])
+        self.assertTrue(miser.flags["game_over"])
+        # score can not exit from user input
+        miser.flags["game_over"] = False
+        ui.input_buffer = ["n"]
+        miser.handle_command(["score"])
+        self.assertFalse(miser.flags["game_over"])
 
 
 def suite():
