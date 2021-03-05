@@ -1,5 +1,5 @@
 import unittest
-from miserLib import Miser, IUserInterface, Items, Rooms, Subjects
+from miserLib import Miser, IUserInterface, Items, Rooms, Subjects, welcome_banner
 
 
 class TestUI(IUserInterface):
@@ -429,16 +429,204 @@ class MiserTest(unittest.TestCase):
         self.assertEqual(miser.current_position, Rooms.POOL_AREA)
 
     def test_unlock_command(self):
-        pass
+        ui = TestUI()
+        miser = Miser(ui)
+        # unhandled object
+        miser.handle_command(["unlock", "mat"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # handled object, wrong location
+        miser.current_position = Rooms.FOYER
+        miser.handle_command(["unlock", "door"])
+        self.assertEqual(miser.current_position, Rooms.FOYER)
+        # vault not visible
+        miser.current_position = Rooms.REDWALL_ROOM
+        miser.handle_command(["unlock", "door"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        # trapdoor has no lock
+        miser.current_position = Rooms.PARLOR
+        miser.handle_command(["unlock", "door"])
+        self.assertEqual(miser.current_position, Rooms.PARLOR)
+
+    def test_unlock_vault(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # vault is hidden
+        miser.current_position = Rooms.REDWALL_ROOM
+        miser.handle_command(["unlock", "vault"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        # vault exposed, no combo
+        miser.flags["found_vault"] = True
+        miser.handle_command(["unlock", "vault"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        # vault exposed, known combo
+        miser.flags["know_combination"] = True
+        miser.handle_command(["unlock", "vault"])
+        self.assertEqual(miser.flags["vault_open"], True)
+        # vault reopen
+        miser.handle_command(["unlock", "vault"])
+        self.assertEqual(miser.flags["vault_open"], True)
 
     def test_go_command(self):
-        pass
+        ui = TestUI()
+        miser = Miser(ui)
+        # no stairs without sword
+        miser.current_position = Rooms.GREAT_HALL
+        miser.handle_command(["go", "stairs"])
+        self.assertEqual(miser.current_position, Rooms.GREAT_HALL)
+        # stairs with sword
+        miser.current_position = Rooms.CHINESE_ROOM
+        miser.handle_command(["get", "sword"])
+        miser.current_position = Rooms.GREAT_HALL
+        miser.handle_command(["go", "stairs"])
+        self.assertEqual(miser.current_position, Rooms.MIDDLE_WESTERN_HALLWAY)
+        # stairs down
+        miser.handle_command(["go", "stairs"])
+        self.assertEqual(miser.current_position, Rooms.GREAT_HALL)
+        # no stairs
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["go", "stairs"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # ladder in wrong place
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["go", "ladder"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # pool in wrong place
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["go", "pool"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # can't go flooded pool
+        miser.current_position = Rooms.POOL_AREA
+        miser.flags["pool_flooded"] = True
+        miser.handle_command(["go", "pool"])
+        self.assertEqual(miser.current_position, Rooms.POOL_AREA)
+        # can go empty pool
+        miser.flags["pool_flooded"] = False
+        miser.handle_command(["go", "pool"])
+        self.assertEqual(miser.current_position, Rooms.BOTTOM_OF_POOL)
+        # can go up ladder
+        miser.handle_command(["go", "ladder"])
+        self.assertEqual(miser.current_position, Rooms.POOL_AREA)
+
+    def test_jump_command(self):
+        ui = TestUI()
+        miser = Miser(ui)
+        # no place to jump
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["jump"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # jump stairs (first)
+        miser.current_position = Rooms.MIDDLE_WESTERN_HALLWAY
+        miser.handle_command(["jump"])
+        self.assertEqual(miser.current_position, Rooms.GREAT_HALL)
+        self.assertTrue(miser.flags["jump_warning"])
+        # jump stairs (second) kills you
+        miser.current_position = Rooms.MIDDLE_WESTERN_HALLWAY
+        miser.handle_command(["jump"])
+        self.assertTrue(miser.flags["game_over"])
+        # jump front balcony no parachute kills you
+        miser = Miser(ui)
+        miser.current_position = Rooms.FRONT_BALCONY
+        miser.handle_command(["jump"])
+        self.assertTrue(miser.flags["game_over"])
+        # jump with broken parachute does nothing
+        miser = Miser(ui)
+        miser.current_position = Rooms.CLOSET
+        miser.handle_command(["get", "parachute"])
+        miser.current_position = Rooms.FRONT_BALCONY
+        miser.handle_command(["jump"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_BALCONY)
+        # jump rear balcony with good parachute lands in maze
+        miser = Miser(ui)
+        miser.items[Items.REPAIRED_PARACHUTE].location = -1
+        miser.current_position = Rooms.REAR_BALCONY
+        miser.handle_command(["jump"])
+        self.assertEqual(miser.current_position, Rooms.HEDGE_MAZE0)
+        # jump front balcony with good parachute escapes
+        miser = Miser(ui)
+        miser.items[Items.REPAIRED_PARACHUTE].location = -1
+        miser.current_position = Rooms.FRONT_BALCONY
+        miser.handle_command(["jump"])
+        self.assertTrue(miser.flags["escaped"])
 
     def test_open_command(self):
-        pass
+        ui = TestUI()
+        miser = Miser(ui)
+        # can't open missing book
+        miser.handle_command(["open", "book"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # can open book if present
+        miser.current_position = Rooms.LIBRARY
+        miser.handle_command(["open", "book"])
+        self.assertEqual(miser.current_position, Rooms.LIBRARY)
+        # can open book in inventory
+        miser.handle_command(["get", "book"])
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["open", "book"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        # open valve
+        miser.current_position = Rooms.PUMP_HOUSE
+        miser.handle_command(["open", "valve"])
+        self.assertEqual(miser.current_position, Rooms.PUMP_HOUSE)
+        # open front door only if unlocked
+        miser = Miser(ui)
+        miser.handle_command(["open", "door"])
+        self.assertFalse(miser.flags["dungeon_unlocked"])
+        miser.flags["dungeon_unlocked"] = True
+        miser.handle_command(["open", "door"])
+        self.assertTrue(miser.flags["dungeon_unlocked"])
+        miser.handle_command(["open", "door"])
+        self.assertTrue(miser.flags["dungeon_unlocked"])
+        # can't open doors just anywhere
+        miser.current_position = Rooms.CLOSET
+        miser.handle_command(["open", "door"])
+        self.assertEqual(miser.current_position, Rooms.CLOSET)
+        # opening trapdoor leads to dungeon
+        miser.current_position = Rooms.PARLOR
+        miser.handle_command(["open", "door"])
+        self.assertEqual(miser.current_position, Rooms.DUNGEON)
+        # open cabinet needs cabinet
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["open", "cabinet"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        miser.current_position = Rooms.REDWALL_ROOM
+        miser.handle_command(["open", "cabinet"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        # open bag needs bag
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["open", "bag"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        miser.current_position = Rooms.VAULT
+        miser.handle_command(["open", "bag"])
+        self.assertEqual(miser.current_position, Rooms.VAULT)
+        # open vault needs vault
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["open", "vault"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        miser.current_position = Rooms.REDWALL_ROOM
+        miser.flags["found_vault"] = True
+        miser.flags["vault_open"] = False
+        miser.handle_command(["open", "vault"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        miser.flags["vault_open"] = True
+        miser.handle_command(["open", "vault"])
+        self.assertEqual(miser.current_position, Rooms.REDWALL_ROOM)
+        # open organ needs ballroom
+        miser.current_position = Rooms.FRONT_PORCH
+        miser.handle_command(["open", "organ"])
+        self.assertEqual(miser.current_position, Rooms.FRONT_PORCH)
+        miser.current_position = Rooms.BALLROOM
+        miser.handle_command(["open", "organ"])
+        self.assertEqual(miser.current_position, Rooms.BALLROOM)
+        miser.flags["organ_playing"] = True
+        miser.handle_command(["open", "organ"])
+        self.assertEqual(miser.current_position, Rooms.BALLROOM)
+        miser.handle_command(["open", "organ"])
+        self.assertEqual(miser.current_position, Rooms.BALLROOM)
 
-    def test_go_command(self):
-        pass
+    def test_welcome(self):
+        ui = TestUI()
+        welcome_banner(ui)
+        self.assertTrue(True)
 
 
 def suite():

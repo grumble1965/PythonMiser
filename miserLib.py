@@ -139,7 +139,7 @@ class Miser:
             ('parachute with no ripcord', Rooms.CLOSET), ('oriental rug', Rooms.PARLOR),
             ("trapdoor marked 'danger'", -2), ('parachute ripcord', -2), ('portal in north wall', -2),
             ('pair of *ruby slippers*', -2), ('brass door key', -2),
-            ('majestic staircase leading up', Rooms.GREEN_ROOM),
+            ('majestic staircase leading up', Rooms.GREAT_HALL),
             ('majestic staircase leading down', Rooms.MIDDLE_WESTERN_HALLWAY), ('battered book', Rooms.LIBRARY),
             ('organ in the corner', Rooms.BALLROOM), ('open organ in the corner', -2),
             ('cabinet on rollers against one wall over', Rooms.REDWALL_ROOM), ('repaired parachute', -2),
