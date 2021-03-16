@@ -155,14 +155,14 @@ class Miser:
             ('--unused--', -999),
             ('ripc', Items.RIPCORD), ('mat', Items.MAT), ('pape', Items.PAPER),
             ('buck', Items.BUCKET), ('swor', Items.SWORD), ('key', Items.KEY),
-            ('valv', Items.UNMOVEABLE), ('ladd', Items.UNMOVEABLE), ('slip', Items.SLIPPERS),
-            ('rug', Items.RUG), ('book', Items.BOOK), ('door', Items.UNMOVEABLE),
-            ('cabi', Items.UNMOVEABLE), ('ritn', Items.UNMOVEABLE), ('vict', Items.UNMOVEABLE),
-            ('orga', Items.UNMOVEABLE), ('para', Items.BROKEN_PARACHUTE), ('stai', Items.UNMOVEABLE),
+            ('valv', Items.UNMOVABLE), ('ladd', Items.UNMOVABLE), ('slip', Items.SLIPPERS),
+            ('rug', Items.RUG), ('book', Items.BOOK), ('door', Items.UNMOVABLE),
+            ('cabi', Items.UNMOVABLE), ('ritn', Items.UNMOVABLE), ('vict', Items.UNMOVABLE),
+            ('orga', Items.UNMOVABLE), ('para', Items.BROKEN_PARACHUTE), ('stai', Items.UNMOVABLE),
             ('penn', Items.PENNY), ('cros', Items.CROSS), ('leaf', Items.LEAF), ('bag', Items.MONEYBAGS),
             ('>$<', -1), ('>$<', -1), ('ring', Items.RING), ('pain', Items.PAINTING),
-            ('vaul', Items.UNMOVEABLE), ('pool', Items.UNMOVEABLE), ('xyzz', Items.UNMOVEABLE),
-            ('plug', Items.UNMOVEABLE)
+            ('vaul', Items.UNMOVABLE), ('pool', Items.UNMOVABLE), ('xyzz', Items.UNMOVABLE),
+            ('plug', Items.UNMOVABLE)
         ]
         temp_list = []
         for (xx, yy) in command_subject_data:
@@ -323,7 +323,7 @@ class Miser:
         _ = subject
         if subject_index == 0:
             self.error_unknown_object('what?')
-        elif self.subjects[subject_index].item_id == Items.UNMOVEABLE:
+        elif self.subjects[subject_index].item_id == Items.UNMOVABLE:
             self.ui.mp('i am unable to do that.')
         elif self.get_item_location(subject_index) == -1:
             self.ui.mp("you're already carrying it")
@@ -332,7 +332,8 @@ class Miser:
         else:
             self.items[self.subjects[subject_index].item_id].location = -1
             self.ui.mp('ok')
-            if (Items.CHARMED_SNAKE < self.subjects[subject_index].item_id < Items.SWORD) or self.subjects[subject_index].item_id == Items.SLIPPERS:
+            if (Items.CHARMED_SNAKE < self.subjects[subject_index].item_id < Items.SWORD) or \
+                    self.subjects[subject_index].item_id == Items.SLIPPERS:
                 self.ui.mp('you got a treasure!')
                 self.gathered_treasures += 1
             if subject_index == Subjects.MAT and self.items[Items.KEY].location == -2:
@@ -344,11 +345,12 @@ class Miser:
         _ = subject
         if subject_index == 0:
             self.error_unknown_object('move what?')
-        elif subject_index == Subjects.CABINET and self.current_position == Rooms.REDWALL_ROOM and self.rooms[Rooms.REDWALL_ROOM].moves[Move.EAST] == 0:
+        elif subject_index == Subjects.CABINET and self.current_position == Rooms.REDWALL_ROOM and \
+                self.rooms[Rooms.REDWALL_ROOM].moves[Move.EAST] == 0:
             self.ui.mp('behind the cabinet is a vault!')
             self.flags["found_vault"] = True
             self.describe_current_position()
-        elif self.subjects[subject_index].item_id == Items.UNMOVEABLE:
+        elif self.subjects[subject_index].item_id == Items.UNMOVABLE:
             self.ui.mp('that item stays put.')
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
@@ -448,11 +450,11 @@ class Miser:
         _ = subject
         if subject_index == 0:
             self.error_unknown_object('read what?')
-        elif self.subjects[subject_index].item_id > Items.UNMOVEABLE \
+        elif self.subjects[subject_index].item_id > Items.UNMOVABLE \
                 and self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
             self.error_not_here()
-        elif self.subjects[subject_index].item_id == Items.UNMOVEABLE:
+        elif self.subjects[subject_index].item_id == Items.UNMOVABLE:
             self.ui.mp("there's nothing written on that.")
         elif subject_index != Subjects.PAPER and subject_index != Subjects.BOOK:
             self.ui.mp("there's nothing written on that.")
@@ -577,7 +579,7 @@ class Miser:
         _ = subject
         if subject_index == 0:
             self.error_unknown_object('what?')
-        elif self.subjects[subject_index].item_id == Items.UNMOVEABLE:
+        elif self.subjects[subject_index].item_id == Items.UNMOVABLE:
             self.ui.mp("that wouldn't hold anything.")
         elif self.get_item_location(subject_index) != self.current_position \
                 and self.get_item_location(subject_index) != -1:
@@ -601,13 +603,15 @@ class Miser:
             self.error_unknown_object('what?')
         elif subject_index != Subjects.DOOR and subject_index != Subjects.VAULT:
             self.ui.mp("i wouldn't know how to unlock one.")
-        elif self.current_position != Rooms.FRONT_PORCH and self.current_position != Rooms.REDWALL_ROOM and self.current_position != Rooms.PARLOR:
+        elif self.current_position != Rooms.FRONT_PORCH and self.current_position != Rooms.REDWALL_ROOM and \
+                self.current_position != Rooms.PARLOR:
             self.error_not_here()
         elif self.current_position == Rooms.FRONT_PORCH and subject_index == Subjects.DOOR:
             self.unlock_front_door()
         elif self.current_position == Rooms.REDWALL_ROOM and subject_index == Subjects.VAULT:
             self.unlock_vault()
-        elif self.current_position != Rooms.PARLOR or subject_index != Subjects.DOOR or self.items[Items.TRAPDOOR].location != -2:
+        elif self.current_position != Rooms.PARLOR or subject_index != Subjects.DOOR or \
+                self.items[Items.TRAPDOOR].location != -2:
             self.error_not_here()
         else:
             self.ui.mp('the trapdoor has no lock')
@@ -648,7 +652,8 @@ class Miser:
             self.error_unknown_object('what?')
         elif subject_index == Subjects.LADDER and self.current_position != Rooms.BOTTOM_OF_POOL:
             self.error_not_here()
-        elif subject_index == Subjects.STAIRS and self.current_position != Rooms.GREAT_HALL and self.current_position != Rooms.MIDDLE_WESTERN_HALLWAY:
+        elif subject_index == Subjects.STAIRS and self.current_position != Rooms.GREAT_HALL and \
+                self.current_position != Rooms.MIDDLE_WESTERN_HALLWAY:
             self.error_not_here()
         elif subject_index == Subjects.POOL and self.current_position != Rooms.POOL_AREA:
             self.error_not_here()
@@ -700,7 +705,8 @@ class Miser:
     # east
     def east_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        if self.current_position == Rooms.CONSERVATORY and not self.flags["snake_charmed"] and not self.flags["angry_snake"]:
+        if self.current_position == Rooms.CONSERVATORY and not self.flags["snake_charmed"] and \
+                not self.flags["angry_snake"]:
             self.ui.mp('the snake is about to attack!')
             self.flags["angry_snake"] = True
         elif self.current_position == Rooms.CONSERVATORY and not self.flags["snake_charmed"]:
@@ -761,7 +767,8 @@ class Miser:
     # jump
     def jump_command(self, subject_index, subject):
         _, _ = subject_index, subject
-        if self.current_position != Rooms.MIDDLE_WESTERN_HALLWAY and self.current_position != Rooms.FRONT_BALCONY and self.current_position != Rooms.REAR_BALCONY:
+        if self.current_position != Rooms.MIDDLE_WESTERN_HALLWAY and self.current_position != Rooms.FRONT_BALCONY and \
+                self.current_position != Rooms.REAR_BALCONY:
             self.ui.mp("there's nowhere to jump.")
         else:
             self.ui.mp('you jump..')
@@ -842,7 +849,8 @@ class Miser:
         for x in range(1, len(self.items)):
             if self.items[x].location == self.current_position:
                 self.ui.wrap_print(f'there is a {self.items[x].text} here')
-            if x == Items.BUCKET and self.flags["bucket_full"] and self.items[Items.BUCKET].location == self.current_position:
+            if x == Items.BUCKET and self.flags["bucket_full"] and \
+                    self.items[Items.BUCKET].location == self.current_position:
                 self.ui.mp("the bucket is full of water")
         if self.current_position == Rooms.POOL_AREA:
             if self.flags["pool_flooded"]:
@@ -976,7 +984,7 @@ class Items(IntEnum):
     DOWN_STAIRCASE, BOOK, CLOSED_ORGAN = 22, 23, 24
     OPEN_ORGAN, CABINET = 25, 26
     REPAIRED_PARACHUTE, SIGN = 27, 28
-    UNMOVEABLE = -1
+    UNMOVABLE = -1
 
 
 class Rooms(IntEnum):
