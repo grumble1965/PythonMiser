@@ -789,9 +789,7 @@ class MiserTest(unittest.TestCase):
         miser.handle_command(["fix", "parachute"])
         self.assertEqual(miser.current_position, Rooms.BALLROOM)
         miser.handle_command(["south"])
-        # BUG!  south of the ballroom should be the smoking room
-        # instead, it's moving the player to the portico
-        # the following 'east' moves to the smoking room
+        self.assertEqual(miser.current_position, Rooms.PORTICO)
         miser.handle_command(["east"])
         self.assertEqual(miser.current_position, Rooms.SMOKING_ROOM)
         miser.handle_command(["east"])

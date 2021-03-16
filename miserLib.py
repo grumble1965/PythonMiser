@@ -506,7 +506,7 @@ class Miser:
         elif self.current_position == Rooms.PORTICO and subject_index == Subjects.PENNY:
             self.ui.wrap_print('as the penny sinks below the surface of the pool, a fleeting image of')
             self.ui.mp('a chapel with dancers appears.')
-            self.rooms[Rooms.BALLROOM].moves[Move.EAST] = Rooms.CHAPEL
+            self.rooms[Rooms.BALLROOM].moves[Move.EAST] = Rooms.CHAPEL.value
             self.items[Items.PENNY].location = -2
         elif self.current_position == Rooms.CHAPEL and subject_index == Subjects.CROSS:
             self.ui.wrap_print('even before it hits the ground, the cross fades away!')
@@ -541,7 +541,7 @@ class Miser:
         else:
             self.ui.mp('a portal has opened in the north wall!!')
             self.flags["portal_visible"] = True
-            self.rooms[Rooms.TROPHY_ROOM].moves[Move.NORTH] = Rooms.GAME_ROOM
+            self.rooms[Rooms.TROPHY_ROOM].moves[Move.NORTH] = Rooms.GAME_ROOM.value
             self.items[Items.PORTAL].location = Rooms.TROPHY_ROOM
 
     def say_ritnew(self):
@@ -551,7 +551,7 @@ class Miser:
             self.ui.wrap_print('the snake is charmed by the very utterance of your words.')
             self.flags["snake_charmed"] = True
             self.items[Items.VICIOUS_SNAKE].location = -2
-            self.items[Items.CHARMED_SNAKE].location = Rooms.CONSERVATORY
+            self.items[Items.CHARMED_SNAKE].location = Rooms.CONSERVATORY.value
 
     # pour
     def pour_command(self, subject_index, subject):
@@ -627,7 +627,7 @@ class Miser:
             self.ui.mp("ok, let's see.  12..35..6..")
             self.ui.mp('<click!> the door swings open.')
             self.flags["vault_open"] = True
-            self.rooms[Rooms.REDWALL_ROOM].moves[Move.EAST] = Rooms.VAULT
+            self.rooms[Rooms.REDWALL_ROOM].moves[Move.EAST] = Rooms.VAULT.value
             self.describe_current_position()
 
     def unlock_front_door(self):
